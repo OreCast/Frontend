@@ -1,0 +1,8 @@
+<section>
+  <article>
+{{range $site := .Sites}}
+    <a href="/storage?site={{$site}}">{{$site}}</a>
+    <br/>
+{{end}}
+  </article>
+</section>

@@ -1,0 +1,10 @@
+<section>
+  <article>
+      <h2>Site: {{.Site}}</h2>
+      <hr/>
+{{range $dataset := .Datasets}}
+    {{$dataset}}
+    <br/>
+{{end}}
+  </article>
+</section>
