@@ -68,9 +68,9 @@ func setupRouter() *gin.Engine {
 			if Config.Verbose > 0 {
 				log.Printf("for site %s meta-data records %+v", site, metaRecords)
 			}
-			content += "<h3>MetaData records</h3><br/>"
+			content += "<h3>MetaData records</h3>"
 			for _, rec := range metaRecords {
-				content += fmt.Sprintf("<br/>ID: %s", rec.ID)
+				content += fmt.Sprintf("ID: %s", rec.ID)
 				content += fmt.Sprintf("<br/>Bucket: <a href=\"%s/storage?site=%s&bucket=%s\">%s</a>", Config.Base, site, rec.Bucket, rec.Bucket)
 				if rec.Site == site {
 					content += fmt.Sprintf("<br/>Description: %s", rec.Description)
