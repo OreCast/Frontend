@@ -16,9 +16,9 @@ type MetaData struct {
 }
 
 // helper function to fetch sites info from discovery service
-func metadata() []MetaData {
+func metadata(site string) []MetaData {
 	var results []MetaData
-	rurl := fmt.Sprintf("%s/meta", Config.MetaDataURL)
+	rurl := fmt.Sprintf("%s/meta?site=%s", Config.MetaDataURL, site)
 	resp, err := http.Get(rurl)
 	log.Println("### rurl", rurl, err)
 	if err != nil {

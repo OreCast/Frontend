@@ -9,16 +9,19 @@ import (
 	credentials "github.com/minio/minio-go/v7/pkg/credentials"
 )
 
-func datasets(uri string) []string {
-	endpoint := "play.min.io"
-	accessKeyID := "Q3AM3UQ867SPQQA43P2F"
-	secretAccessKey := "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
-	useSSL := true
+// S3 represent S3 storage record
+type S3 struct {
+	Endpoint     string
+	AccessKey    string
+	AccessSecret string
+	UseSSL       bool
+}
 
+func datasets(s3 S3) []string {
 	// Initialize minio client object.
-	minioClient, err := minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
-		Secure: useSSL,
+	minioClient, err := minio.New(s3.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(s3.AccessKey, s3.AccessSecret, ""),
+		Secure: s3.UseSSL,
 	})
 	if err != nil {
 		log.Fatalln(err)

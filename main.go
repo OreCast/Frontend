@@ -36,5 +36,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("unable to parse config %s, error %v\n", config, err)
 	}
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	Server(config)
 }

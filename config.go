@@ -46,8 +46,10 @@ type Configuration struct {
 	LimiterPeriod string   `json:"rate"`         // limiter rate value
 
 	// OreCast parts
-	DiscoveryURL string `json:"discovery_url"`
-	MetaDataURL  string `json:"metadata_url"`
+	DiscoveryPassword string `json:"discovery_secret"` // data-discovery password
+	DiscoveryCipher   string `json:"discovery_cipher"` // data-discovery cipher
+	DiscoveryURL      string `json:"discovery_url"`    // data-discovery URL
+	MetaDataURL       string `json:"metadata_url"`     // meta-data service URL
 }
 
 // Credentials returns provider OAuth credential record
@@ -79,7 +81,7 @@ func parseConfig(configFile string) error {
 
 	// default values
 	if Config.Port == 0 {
-		Config.Port = 8181
+		Config.Port = 9003
 	}
 	if Config.LimiterPeriod == "" {
 		Config.LimiterPeriod = "100-S"

@@ -56,13 +56,21 @@ func setupRouter() *gin.Engine {
 	tmpl = makeTmpl("Sites")
 	r.GET("/sites", func(c *gin.Context) {
 		var content string
-		metaRecords := metadata()
-		for _, site := range sites() {
-			content += fmt.Sprintf("<a href=\"%s/storage?site=%s\">%s</a>", Config.Base, site, site)
+		for _, sobj := range sites() {
+			site := sobj.Name
+			content += fmt.Sprintf("Site: <a href=\"%s/storage?site=%s\">%s</a>", Config.Base, site, site)
+			if sobj.Description != "" {
+				content += "<br/>" + sobj.Description + "<hr/>"
+			}
+			metaRecords := metadata(site)
 			for _, rec := range metaRecords {
 				if rec.Site == site {
-					content += "<br/>" + rec.Description + "<hr/>"
+					content += fmt.Sprintf("<br/>Description: %s", rec.Description)
 				}
+				if len(rec.Tags) > 0 {
+					content += fmt.Sprintf("<br/>Tags: %v", rec.Tags)
+				}
+				content += "<hr/>"
 			}
 		}
 		tmpl["Content"] = template.HTML(content)
@@ -71,11 +79,13 @@ func setupRouter() *gin.Engine {
 	})
 
 	tmpl = makeTmpl("Datasets")
-	tmpl["Datasets"] = datasets("")
+	//     tmpl["Datasets"] = datasets("")
+	tmpl["Datasets"] = []string{}
 	r.GET("/storage", func(c *gin.Context) {
 		var params Params
 		c.Bind(&params)
-		log.Println("params", params)
+		siteObj := site(params.Site)
+		tmpl["Datasets"] = siteObj.Datasets
 		tmpl["Site"] = params.Site
 		datasets := tmplPage("datasets.tmpl", tmpl)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+datasets+bottom))
@@ -100,5 +110,7 @@ func setupRouter() *gin.Engine {
 
 func Server(configFile string) {
 	r := setupRouter()
-	r.Run(":9000")
+	sport := fmt.Sprintf(":%d", Config.Port)
+	log.Printf("Start HTTP server %s", sport)
+	r.Run(sport)
 }
