@@ -81,7 +81,7 @@ func parseConfig(configFile string) error {
 
 	// default values
 	if Config.Port == 0 {
-		Config.Port = 9003
+		Config.Port = 8344
 	}
 	if Config.LimiterPeriod == "" {
 		Config.LimiterPeriod = "100-S"
