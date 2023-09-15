@@ -95,10 +95,10 @@ func parseConfig(configFile string) error {
 		}
 	}
 	if Config.DiscoveryURL == "" {
-		Config.DiscoveryURL = "http://localhost:9091"
+		Config.DiscoveryURL = "http://localhost:8320"
 	}
 	if Config.MetaDataURL == "" {
-		Config.MetaDataURL = "http://localhost:9092"
+		Config.MetaDataURL = "http://localhost:8300"
 	}
 	if Config.RedirectURL == "" {
 		if host, err := os.Hostname(); err == nil {
