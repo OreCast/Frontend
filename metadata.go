@@ -10,6 +10,7 @@ import (
 // helper function to get metadata
 // MetaData represents MetaData object returned from discovery service
 type MetaData struct {
+	ID          string   `json:"id"`
 	Site        string   `json:"site"`
 	Description string   `json:"description"`
 	Tags        []string `json:"tags"`

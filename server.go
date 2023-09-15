@@ -63,6 +63,10 @@ func setupRouter() *gin.Engine {
 				content += "<br/>" + sobj.Description + "<hr/>"
 			}
 			metaRecords := metadata(site)
+			if Config.Verbose > 0 {
+				log.Printf("for site %s meta-data records %+v", site, metaRecords)
+			}
+			content += "<h3>MetaData records</h3><br/>"
 			for _, rec := range metaRecords {
 				if rec.Site == site {
 					content += fmt.Sprintf("<br/>Description: %s", rec.Description)
