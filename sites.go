@@ -53,7 +53,7 @@ type DiscoveryRecord struct {
 	UseSSL       bool   `json:"use_ssl"`
 }
 
-func site(site string) SiteObject {
+func site(site, bucket string) SiteObject {
 	surl := fmt.Sprintf("%s/sites", Config.DiscoveryURL)
 	if Config.Verbose > 0 {
 		log.Println("query", surl)
@@ -109,7 +109,7 @@ func site(site string) SiteObject {
 			}
 			obj := SiteObject{
 				Name:     site,
-				Datasets: datasets(s3),
+				Datasets: datasets(s3, bucket),
 			}
 			return obj
 		}

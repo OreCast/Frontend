@@ -39,8 +39,10 @@ func makeTmpl(title string) TmplRecord {
 	return tmpl
 }
 
-type Params struct {
-	Site string `form:"site"`
+// SiteParam defines form parameters for site call
+type SiteParams struct {
+	Site   string `form:"site"`
+	Bucket string `form:"bucket"`
 }
 
 func setupRouter() *gin.Engine {
@@ -69,6 +71,7 @@ func setupRouter() *gin.Engine {
 			content += "<h3>MetaData records</h3><br/>"
 			for _, rec := range metaRecords {
 				content += fmt.Sprintf("<br/>ID: %s", rec.ID)
+				content += fmt.Sprintf("<br/><a href=\"%s/storage?site=%s&bucket=%s\">Bucket: %s</a>", Config.Base, site, rec.Bucket, rec.Bucket)
 				if rec.Site == site {
 					content += fmt.Sprintf("<br/>Description: %s", rec.Description)
 				}
@@ -87,9 +90,9 @@ func setupRouter() *gin.Engine {
 	//     tmpl["Datasets"] = datasets("")
 	tmpl["Datasets"] = []string{}
 	r.GET("/storage", func(c *gin.Context) {
-		var params Params
+		var params SiteParams
 		c.Bind(&params)
-		siteObj := site(params.Site)
+		siteObj := site(params.Site, params.Bucket)
 		tmpl["Datasets"] = siteObj.Datasets
 		tmpl["Site"] = params.Site
 		datasets := tmplPage("datasets.tmpl", tmpl)

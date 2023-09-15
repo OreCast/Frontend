@@ -14,6 +14,7 @@ type MetaData struct {
 	Site        string   `json:"site"`
 	Description string   `json:"description"`
 	Tags        []string `json:"tags"`
+	Bucket      string   `json:"bucket"`
 }
 
 // helper function to fetch sites info from discovery service
