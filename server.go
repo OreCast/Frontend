@@ -61,8 +61,9 @@ func setupRouter() *gin.Engine {
 		for _, sobj := range sites() {
 			site := sobj.Name
 			content += fmt.Sprintf("Site: <a href=\"%s/storage?site=%s\">%s</a>", Config.Base, site, site)
+			content += fmt.Sprintf("<br/>Storage: <a href=\"%s\">S3</a>", sobj.URL)
 			if sobj.Description != "" {
-				content += "<br/>" + sobj.Description + "<hr/>"
+				content += "<br/>Description: " + sobj.Description + "<hr/>"
 			}
 			metaRecords := metadata(site)
 			if Config.Verbose > 0 {
