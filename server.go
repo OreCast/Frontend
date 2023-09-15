@@ -68,6 +68,7 @@ func setupRouter() *gin.Engine {
 			}
 			content += "<h3>MetaData records</h3><br/>"
 			for _, rec := range metaRecords {
+				content += fmt.Sprintf("<br/>ID: %s", rec.ID)
 				if rec.Site == site {
 					content += fmt.Sprintf("<br/>Description: %s", rec.Description)
 				}
