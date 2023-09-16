@@ -9,6 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Documentation about gib handlers can be found over here:
+// https://go.dev/doc/tutorial/web-service-gin
+
 // DocsHandler provides handler for /docs end-point
 func DocsHandler(c *gin.Context) {
 	tmpl := makeTmpl("Documentation")
