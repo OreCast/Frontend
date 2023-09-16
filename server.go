@@ -3,7 +3,6 @@ package main
 import (
 	"embed"
 	"fmt"
-	"html/template"
 	"io/fs"
 	"log"
 	"net/http"
@@ -50,85 +49,14 @@ func setupRouter() *gin.Engine {
 	// gin.DisableConsoleColor()
 	r := gin.Default()
 
-	// top and bottom HTTP content from our templates
-	tmpl := makeTmpl("OreCast")
-	top := tmplPage("top.tmpl", tmpl)
-	bottom := tmplPage("bottom.tmpl", tmpl)
-
-	r.GET("/docs", func(c *gin.Context) {
-		tmpl = makeTmpl("Documentation")
-		tmpl["Content"] = "OreCast Documentation page"
-		content := tmplPage("content.tmpl", tmpl)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
-	})
-	r.GET("/meta", func(c *gin.Context) {
-		tmpl = makeTmpl("MetaData")
-		tmpl["Content"] = "OreCast MetaData page"
-		content := tmplPage("content.tmpl", tmpl)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
-	})
-	r.GET("/discovery", func(c *gin.Context) {
-		tmpl = makeTmpl("Discovery")
-		tmpl["Content"] = "OreCast discovery"
-		content := tmplPage("content.tmpl", tmpl)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
-	})
-	r.GET("/analytics", func(c *gin.Context) {
-		tmpl = makeTmpl("Analytics")
-		tmpl["Content"] = "OreCast analytics page"
-		content := tmplPage("content.tmpl", tmpl)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
-	})
-	r.GET("/provenance", func(c *gin.Context) {
-		tmpl = makeTmpl("Provenance")
-		tmpl["Content"] = "OreCast provenant page"
-		content := tmplPage("content.tmpl", tmpl)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
-	})
-	r.GET("/sites", func(c *gin.Context) {
-		tmpl = makeTmpl("Sites")
-		var content string
-		for _, sobj := range sites() {
-			site := sobj.Name
-			content += fmt.Sprintf("Site: <a href=\"%s/storage?site=%s\">%s</a>", Config.Base, site, site)
-			content += fmt.Sprintf("<br/>Storage: <a href=\"%s\">S3</a>", sobj.URL)
-			if sobj.Description != "" {
-				content += "<br/>Description: " + sobj.Description + "<hr/>"
-			}
-			metaRecords := metadata(site)
-			if Config.Verbose > 0 {
-				log.Printf("for site %s meta-data records %+v", site, metaRecords)
-			}
-			content += "<h3>MetaData records</h3>"
-			for _, rec := range metaRecords {
-				content += fmt.Sprintf("ID: %s", rec.ID)
-				content += fmt.Sprintf("<br/>Bucket: <a href=\"%s/storage?site=%s&bucket=%s\">%s</a>", Config.Base, site, rec.Bucket, rec.Bucket)
-				if rec.Site == site {
-					content += fmt.Sprintf("<br/>Description: %s", rec.Description)
-				}
-				if len(rec.Tags) > 0 {
-					content += fmt.Sprintf("<br/>Tags: %v", rec.Tags)
-				}
-				content += "<hr/>"
-			}
-		}
-		tmpl["Content"] = template.HTML(content)
-		sites := tmplPage("content.tmpl", tmpl)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+sites+bottom))
-	})
-
-	//     tmpl["Datasets"] = datasets("")
-	tmpl["Datasets"] = []string{}
-	r.GET("/storage", func(c *gin.Context) {
-		tmpl = makeTmpl("Storage")
-		var params SiteParams
-		c.Bind(&params)
-		siteObj := site(params.Site, params.Bucket)
-		tmpl["Datasets"] = siteObj.Datasets
-		tmpl["Site"] = params.Site
-		content := tmplPage("datasets.tmpl", tmpl)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
-	})
+	// various routes
+	r.GET("/docs", DocsHandler)
+	r.GET("/meta", MetaDataHandler)
+	r.GET("/analytics", AnalyticsHandler)
+	r.GET("/discovery", DiscoveryHandler)
+	r.GET("/provenance", ProvenanceHandler)
+	r.GET("/sites", SitesHandler)
+	r.GET("/storage", StorageHandler)
 
 	// static files
 	for _, dir := range []string{"js", "css", "images"} {
@@ -140,6 +68,10 @@ func setupRouter() *gin.Engine {
 		r.StaticFS(m, http.FS(filesFS))
 	}
 
+	// top and bottom HTTP content from our templates
+	tmpl := makeTmpl("OreCast home")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
 	content := tmplPage("index.tmpl", tmpl)
 	r.GET("/", func(c *gin.Context) {
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
