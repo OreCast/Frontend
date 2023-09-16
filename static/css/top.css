@@ -10,13 +10,18 @@ body {
 
 /* Style the header */
 header {
-  background-color: #b31b1b;
-  padding: 20px;
+  background-color: #197B7E;
+  padding: 10px;
   text-align: center;
   color: white;
 }
 .white {
   color: white;
+}
+.menu {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 30px;
 }
 
 article {
@@ -25,7 +30,7 @@ article {
   padding-bottom: 10px;
   padding-left: 300px;
   padding-right: 300px;
-  background-color: #f1f1f1;
+  background-color: #ffffff;
   width:100%;
   min-height: 600px;
 }
