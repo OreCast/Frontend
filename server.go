@@ -55,8 +55,38 @@ func setupRouter() *gin.Engine {
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 
-	tmpl = makeTmpl("Sites")
+	r.GET("/docs", func(c *gin.Context) {
+		tmpl = makeTmpl("Documentation")
+		tmpl["Content"] = "OreCast Documentation page"
+		content := tmplPage("content.tmpl", tmpl)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+	})
+	r.GET("/meta", func(c *gin.Context) {
+		tmpl = makeTmpl("MetaData")
+		tmpl["Content"] = "OreCast MetaData page"
+		content := tmplPage("content.tmpl", tmpl)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+	})
+	r.GET("/discovery", func(c *gin.Context) {
+		tmpl = makeTmpl("Discovery")
+		tmpl["Content"] = "OreCast discovery"
+		content := tmplPage("content.tmpl", tmpl)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+	})
+	r.GET("/analytics", func(c *gin.Context) {
+		tmpl = makeTmpl("Analytics")
+		tmpl["Content"] = "OreCast analytics page"
+		content := tmplPage("content.tmpl", tmpl)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+	})
+	r.GET("/provenance", func(c *gin.Context) {
+		tmpl = makeTmpl("Provenance")
+		tmpl["Content"] = "OreCast provenant page"
+		content := tmplPage("content.tmpl", tmpl)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+	})
 	r.GET("/sites", func(c *gin.Context) {
+		tmpl = makeTmpl("Sites")
 		var content string
 		for _, sobj := range sites() {
 			site := sobj.Name
@@ -87,17 +117,17 @@ func setupRouter() *gin.Engine {
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+sites+bottom))
 	})
 
-	tmpl = makeTmpl("Datasets")
 	//     tmpl["Datasets"] = datasets("")
 	tmpl["Datasets"] = []string{}
 	r.GET("/storage", func(c *gin.Context) {
+		tmpl = makeTmpl("Storage")
 		var params SiteParams
 		c.Bind(&params)
 		siteObj := site(params.Site, params.Bucket)
 		tmpl["Datasets"] = siteObj.Datasets
 		tmpl["Site"] = params.Site
-		datasets := tmplPage("datasets.tmpl", tmpl)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+datasets+bottom))
+		content := tmplPage("datasets.tmpl", tmpl)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 	})
 
 	// static files
@@ -110,9 +140,9 @@ func setupRouter() *gin.Engine {
 		r.StaticFS(m, http.FS(filesFS))
 	}
 
-	index := tmplPage("index.tmpl", tmpl)
+	content := tmplPage("index.tmpl", tmpl)
 	r.GET("/", func(c *gin.Context) {
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+index+bottom))
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 	})
 	return r
 }
