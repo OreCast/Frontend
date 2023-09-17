@@ -65,8 +65,8 @@ func setupRouter() *gin.Engine {
 	r.GET("/login", LoginHandler)
 	r.GET("/registry", UserRegistryHandler)
 
-	// captcha
-	r.GET("/captcha", captchaHandler())
+	// captcha access
+	r.GET("/captcha/:file", CaptchaHandler())
 
 	// POST end-poinst
 	r.POST("/site/registration", SiteRegistrationPostHandler)

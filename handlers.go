@@ -31,10 +31,9 @@ func successTmpl(msg string) string {
 	return content
 }
 
-// helper captcha handler
-func captchaHandler() gin.HandlerFunc {
+// CaptchaHandler provides access to captcha server
+func CaptchaHandler() gin.HandlerFunc {
 	hdlr := captcha.Server(captcha.StdWidth, captcha.StdHeight)
-
 	return func(c *gin.Context) {
 		hdlr.ServeHTTP(c.Writer, c.Request)
 	}
