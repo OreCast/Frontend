@@ -131,8 +131,6 @@ func DataAccessHandler(c *gin.Context) {
 func SiteAccessHandler(c *gin.Context) {
 }
 
-// POST handlers
-
 // SiteRegistrationHandler provide access to GET /site/registration endpoint
 func SiteRegistrationHandler(c *gin.Context) {
 	tmpl := makeTmpl("Storage")
@@ -144,4 +142,30 @@ func SiteRegistrationHandler(c *gin.Context) {
 
 // DataRegistrationHandler provide access to GET /data/registration endpoint
 func DataRegistrationHandler(c *gin.Context) {
+}
+
+// POST handlers
+
+// SiteRegistrationHandler provide access to POST /site/registration endpoint
+func SiteRegistrationPostHandler(c *gin.Context) {
+	tmpl := makeTmpl("Storage")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+
+	// parse input form request
+	var form Site
+	if err := c.ShouldBind(&form); err != nil {
+		tmpl["Content"] = fmt.Sprintf("ERROR: %v", err)
+	} else {
+		tmpl["Content"] = "success"
+		log.Printf("### got new site %+v", form)
+	}
+
+	// return page
+	content := tmplPage("content.tmpl", tmpl)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+}
+
+// DataRegistrationPostHandler provide access to POST /data/registration endpoint
+func DataRegistrationPostHandler(c *gin.Context) {
 }

@@ -1,33 +1,42 @@
 <section>
   <article>
-
-<form class="form">
-    <div class="form-item">
-        <label>Name</label>
-        <input class="input" type="text">
-    </div>
-    <div class="form-item">
-        <label>Country</label>
-        <select class="input">
-            <option value="">---</option>
-        </select>
-    </div>
-    <div class="form-item">
-        <label class="checkbox">
-            <input class="input" type="checkbox"> Check me
-        </label>
-        <label class="radio">
-            <input class="input" type="radio"> Radio me
-        </label>
-    </div>
-    <div class="form-item">
-        <textarea class="input" rows="6"></textarea>
-    </div>
-    <div class="form-item">
-        <button class="button button-primary">Save</button>
-        <button class="button">Cancel</button>
-    </div>
-</form>
+      <form class="form" action="{{.Base}}/site/registration" method="post">
+        <div class="form-item">
+            <label>Site Name <span class="hint hint-req">*</span></label>
+            <input class="input" type="text" name="name">
+        </div>
+        <div class="form-item">
+            <label>Storage URL <span class="hint hint-req">*</span></label>
+            <input class="input" type="text" name="url">
+        </div>
+        <div class="form-item">
+            <label>Endpoint<span class="hint hint-req">*</span></label>
+            <input class="input" type="text" name="endpoint">
+        </div>
+        <div class="form-item">
+            <label>Access Key<span class="hint hint-req">*</span></label>
+            <input class="input" type="password" name="access_key">
+        </div>
+        <div class="form-item">
+            <label>Access Secret<span class="hint hint-req">*</span></label>
+            <input class="input" type="password" name="access_secret">
+        </div>
+        <div class="form-item">
+            <label>Description</label>
+            <input class="input" type="text" name="description">
+        </div>
+        <div class="form-item">
+            <label>SSL</label>
+            <select class="input" name="use_ssl">
+                <option value="false">false</option>
+                <option value="true">true</option>
+            </select>
+        </div>
+        <div class="form-item">
+            <button class="button button-primary">Save</button>
+            <button class="button">Cancel</button>
+        </div>
+    </form>
 
   </article>
 </section>

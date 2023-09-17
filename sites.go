@@ -13,9 +13,16 @@ import (
 
 // Site represents Site object returned from discovery service
 type Site struct {
-	Name        string `json:"name"`
-	URL         string `json:"url"`
-	Description string `json:"description"`
+	//     Name        string `json:"name"`
+	//     URL         string `json:"url"`
+	//     Description string `json:"description"`
+	Name         string `json:"name" form:"name" binding:"required"`
+	URL          string `json:"url" form:"url" binding:"required"`
+	Endpoint     string `json:"endpoint" form:"endpoint" binding:"required"`
+	AccessKey    string `json:"access_key" form:"access_key" binding:"required"`
+	AccessSecret string `json:"access_secret" form:"access_secret" binding:"required"`
+	UseSSL       bool   `json:"use_ssl form:"use_ssl""`
+	Description  string `json:"description form:"description""`
 }
 
 // helper function to fetch sites info from discovery service

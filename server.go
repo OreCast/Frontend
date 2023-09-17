@@ -60,10 +60,12 @@ func setupRouter() *gin.Engine {
 	r.GET("/discovery", DiscoveryHandler)
 	r.GET("/provenance", ProvenanceHandler)
 	r.GET("/storage", StorageHandler)
-
-	// POST end-poinst
 	r.GET("/site/registration", SiteRegistrationHandler)
 	r.GET("/data/registration", DataRegistrationHandler)
+
+	// POST end-poinst
+	r.POST("/site/registration", SiteRegistrationPostHandler)
+	r.POST("/data/registration", DataRegistrationPostHandler)
 
 	// static files
 	for _, dir := range []string{"js", "css", "images"} {
