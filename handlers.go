@@ -18,7 +18,7 @@ func DocsHandler(c *gin.Context) {
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	tmpl["Title"] = "OreCast documentation"
-	fname := "static/markdown/ProofOfConcept.md"
+	fname := "static/markdown/main.md"
 	content, err := mdToHTML(fname)
 	if err != nil {
 		content = fmt.Sprintf("unable to convert %s to HTML, error %v", fname, err)
