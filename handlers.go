@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -11,6 +13,22 @@ import (
 
 // Documentation about gib handlers can be found over here:
 // https://go.dev/doc/tutorial/web-service-gin
+
+// helper function to provide error template message
+func errorTmpl(msg string, err error) string {
+	tmpl := makeTmpl("Status")
+	tmpl["Content"] = template.HTML(fmt.Sprintf("<div>%s</div>\n<br/><h3>ERROR</h3>%v", msg, err))
+	content := tmplPage("error.tmpl", tmpl)
+	return content
+}
+
+// helper functiont to provide success template message
+func successTmpl(msg string) string {
+	tmpl := makeTmpl("Status")
+	tmpl["Content"] = msg
+	content := tmplPage("success.tmpl", tmpl)
+	return content
+}
 
 // DocsHandler provides access to GET /docs end-point
 func DocsHandler(c *gin.Context) {
@@ -154,15 +172,41 @@ func SiteRegistrationPostHandler(c *gin.Context) {
 
 	// parse input form request
 	var form Site
-	if err := c.ShouldBind(&form); err != nil {
-		tmpl["Content"] = fmt.Sprintf("ERROR: %v", err)
+	var err error
+	content := successTmpl("Site registration is successful")
+	if err = c.ShouldBind(&form); err != nil {
+		content = errorTmpl("Site registration binding error", err)
 	} else {
-		tmpl["Content"] = "success"
-		log.Printf("### got new site %+v", form)
+		if Config.Verbose > 0 {
+			log.Printf("register site %+v", form)
+		}
+		// encrypt sensitive fields
+		form, err = encryptSiteObject(form)
+		if err != nil {
+			content = errorTmpl("Site registration failure to encrypt Site attributes", err)
+		} else {
+			// make JSON request to Discovery service
+			if data, err := json.Marshal(form); err == nil {
+				rurl := fmt.Sprintf("%s/sites", Config.DiscoveryURL)
+				resp, err := http.Post(rurl, "application/json", bytes.NewBuffer(data))
+				if err != nil {
+					content = errorTmpl("Site registration posting to discvoeru service failure", err)
+					tmpl["Content"] = template.HTML(content)
+				} else {
+					if Config.Verbose > 0 {
+						log.Printf("discovery service response: %s", resp.Status)
+					}
+				}
+			} else {
+				content = errorTmpl("Site registration json marshalling error", err)
+			}
+		}
 	}
+	log.Println("### content", template.HTML(content))
 
 	// return page
-	content := tmplPage("content.tmpl", tmpl)
+	tmpl["Content"] = template.HTML(content)
+	content = tmplPage("content.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
