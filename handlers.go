@@ -12,7 +12,7 @@ import (
 // Documentation about gib handlers can be found over here:
 // https://go.dev/doc/tutorial/web-service-gin
 
-// DocsHandler provides handler for /docs end-point
+// DocsHandler provides access to GET /docs end-point
 func DocsHandler(c *gin.Context) {
 	tmpl := makeTmpl("Documentation")
 	top := tmplPage("top.tmpl", tmpl)
@@ -30,7 +30,7 @@ func DocsHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
-// MetaDataHandler provides content for /meta endpoint
+// MetaDataHandler provides access to GET /meta endpoint
 func MetaDataHandler(c *gin.Context) {
 	tmpl := makeTmpl("MetaData")
 	top := tmplPage("top.tmpl", tmpl)
@@ -40,7 +40,7 @@ func MetaDataHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
-// DiscoveryHandler provides content for /discovery endpoint
+// DiscoveryHandler provides access to GET /discovery endpoint
 func DiscoveryHandler(c *gin.Context) {
 	tmpl := makeTmpl("Discovery")
 	top := tmplPage("top.tmpl", tmpl)
@@ -50,7 +50,7 @@ func DiscoveryHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
-// AnalyticsHandler provides content for /analytics endpoint
+// AnalyticsHandler provides access to GET /analytics endpoint
 func AnalyticsHandler(c *gin.Context) {
 	tmpl := makeTmpl("Analytics")
 	top := tmplPage("top.tmpl", tmpl)
@@ -60,7 +60,7 @@ func AnalyticsHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
-// ProvenanceHandler provides content for /provenance endpoint
+// ProvenanceHandler provides access to GET /provenance endpoint
 func ProvenanceHandler(c *gin.Context) {
 	tmpl := makeTmpl("Provenance")
 	top := tmplPage("top.tmpl", tmpl)
@@ -70,7 +70,7 @@ func ProvenanceHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
-// SiteHandler provides access to /sites endpoint
+// SiteHandler provides access to GET /sites endpoint
 func SitesHandler(c *gin.Context) {
 	tmpl := makeTmpl("Sites")
 	top := tmplPage("top.tmpl", tmpl)
@@ -105,7 +105,7 @@ func SitesHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+sites+bottom))
 }
 
-// StorageHandler provide access to /storage endpoint
+// StorageHandler provide access to GET /storage endpoint
 func StorageHandler(c *gin.Context) {
 	tmpl := makeTmpl("Storage")
 	top := tmplPage("top.tmpl", tmpl)
@@ -117,4 +117,31 @@ func StorageHandler(c *gin.Context) {
 	tmpl["Site"] = params.Site
 	content := tmplPage("datasets.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+}
+
+// DataHandler provide access to GET /data endpoint
+func DataHandler(c *gin.Context) {
+}
+
+// DataAccessHandler provide access to GET /data/access endpoint
+func DataAccessHandler(c *gin.Context) {
+}
+
+// SiteAccessHandler provide access to GET /site/access endpoint
+func SiteAccessHandler(c *gin.Context) {
+}
+
+// POST handlers
+
+// SiteRegistrationHandler provide access to GET /site/registration endpoint
+func SiteRegistrationHandler(c *gin.Context) {
+	tmpl := makeTmpl("Storage")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+	content := tmplPage("site_registration.tmpl", tmpl)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+}
+
+// DataRegistrationHandler provide access to GET /data/registration endpoint
+func DataRegistrationHandler(c *gin.Context) {
 }

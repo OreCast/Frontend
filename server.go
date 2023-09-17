@@ -49,14 +49,21 @@ func setupRouter() *gin.Engine {
 	// gin.DisableConsoleColor()
 	r := gin.Default()
 
-	// various routes
+	// GET end-points
 	r.GET("/docs", DocsHandler)
+	r.GET("/data", DataHandler)
+	r.GET("/data/access", DataAccessHandler)
 	r.GET("/meta", MetaDataHandler)
+	r.GET("/sites", SitesHandler)
+	r.GET("/site/access", SiteAccessHandler)
 	r.GET("/analytics", AnalyticsHandler)
 	r.GET("/discovery", DiscoveryHandler)
 	r.GET("/provenance", ProvenanceHandler)
-	r.GET("/sites", SitesHandler)
 	r.GET("/storage", StorageHandler)
+
+	// POST end-poinst
+	r.GET("/site/registration", SiteRegistrationHandler)
+	r.GET("/data/registration", DataRegistrationHandler)
 
 	// static files
 	for _, dir := range []string{"js", "css", "images"} {
