@@ -138,3 +138,32 @@ func decrypt(entry, salt, cipher string) (string, error) {
 	}
 	return string(data), nil
 }
+
+// helper function to encrypt entry into hex encoded cipher string
+func encrypt(entry, salt, cipher string) (string, error) {
+	data, err := cryptoutils.Encrypt([]byte(entry), salt, cipher)
+	if err != nil {
+		return "", err
+	}
+	// make hex string out of encrypted data
+	dst := make([]byte, hex.EncodedLen(len(data)))
+	hex.Encode(dst, data)
+	return string(dst), nil
+}
+
+// helper function to encrypt site attributes
+func encryptSiteObject(site Site) (Site, error) {
+	encryptedObject, err := encrypt(site.AccessKey, Config.Password, Config.Cipher)
+	if err != nil {
+		return site, err
+	} else {
+		site.AccessKey = encryptedObject
+	}
+	encryptedObject, err = encrypt(site.AccessSecret, Config.Password, Config.Cipher)
+	if err != nil {
+		return site, err
+	} else {
+		site.AccessSecret = encryptedObject
+	}
+	return site, nil
+}
