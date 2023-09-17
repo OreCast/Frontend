@@ -20,3 +20,9 @@ function FlipTag(tag) {
         }
     }
 }
+function load(url) {
+    window.location.href=url;
+}
+function reload() {
+    load(window.location.href);
+}
