@@ -31,10 +31,6 @@ type Configuration struct {
 	StaticDir   string `json:"static_dir"`   // speficy static dir location
 	RedirectURL string `json:"redirect_url"` // redirect URL for OAuth provider
 
-	// discovery parts
-	Password string `json:"secret"` // data-discovery password
-	Cipher   string `json:"cipher"` // data-discovery cipher
-
 	// OAuth parts
 	OAuth []OAuthRecord `json:"oauth"` // oauth configurations
 
@@ -98,8 +94,8 @@ func parseConfig(configFile string) error {
 			Config.StaticDir = "static"
 		}
 	}
-	if Config.Cipher == "" {
-		Config.Cipher = "aes"
+	if Config.DiscoveryCipher == "" {
+		Config.DiscoveryCipher = "aes"
 	}
 	if Config.DiscoveryURL == "" {
 		Config.DiscoveryURL = "http://localhost:8320"

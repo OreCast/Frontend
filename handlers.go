@@ -25,7 +25,7 @@ func errorTmpl(msg string, err error) string {
 // helper functiont to provide success template message
 func successTmpl(msg string) string {
 	tmpl := makeTmpl("Status")
-	tmpl["Content"] = msg
+	tmpl["Content"] = template.HTML(fmt.Sprintf("<h3>SUCCESS</h3><div>%s</div>", msg))
 	content := tmplPage("success.tmpl", tmpl)
 	return content
 }
@@ -202,7 +202,6 @@ func SiteRegistrationPostHandler(c *gin.Context) {
 			}
 		}
 	}
-	log.Println("### content", template.HTML(content))
 
 	// return page
 	tmpl["Content"] = template.HTML(content)

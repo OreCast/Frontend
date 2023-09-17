@@ -153,13 +153,13 @@ func encrypt(entry, salt, cipher string) (string, error) {
 
 // helper function to encrypt site attributes
 func encryptSiteObject(site Site) (Site, error) {
-	encryptedObject, err := encrypt(site.AccessKey, Config.Password, Config.Cipher)
+	encryptedObject, err := encrypt(site.AccessKey, Config.DiscoveryPassword, Config.DiscoveryCipher)
 	if err != nil {
 		return site, err
 	} else {
 		site.AccessKey = encryptedObject
 	}
-	encryptedObject, err = encrypt(site.AccessSecret, Config.Password, Config.Cipher)
+	encryptedObject, err = encrypt(site.AccessSecret, Config.DiscoveryPassword, Config.DiscoveryCipher)
 	if err != nil {
 		return site, err
 	} else {
