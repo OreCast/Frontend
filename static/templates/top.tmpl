@@ -26,9 +26,11 @@
         </div>
         <div class="column column-4">
             {{if eq .User ""}}
-                <h1 class="white">{{.Title}}</h1>
+                <a href="{{.Base}}/login" class="button button-light button-small">Login</a>
+                &nbsp; | &nbsp;
+                <a href="{{.Base}}/registry" class="button button-light button-small">Registry</a>
             {{else}}
-                <h1 class="white">{{.Title}} ({{.User}})</h1>
+                <h1 class="white">{{.User}}</h1>
             {{end}}
         </div>
     </div>

@@ -8,13 +8,14 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/dchest/captcha"
 	"github.com/gin-gonic/gin"
 )
 
 // Documentation about gib handlers can be found over here:
 // https://go.dev/doc/tutorial/web-service-gin
 
-// helper function to provide error template message
+// helper function to provides error template message
 func errorTmpl(msg string, err error) string {
 	tmpl := makeTmpl("Status")
 	tmpl["Content"] = template.HTML(fmt.Sprintf("<div>%s</div>\n<br/><h3>ERROR</h3>%v", msg, err))
@@ -22,7 +23,7 @@ func errorTmpl(msg string, err error) string {
 	return content
 }
 
-// helper functiont to provide success template message
+// helper functiont to provides success template message
 func successTmpl(msg string) string {
 	tmpl := makeTmpl("Status")
 	tmpl["Content"] = template.HTML(fmt.Sprintf("<h3>SUCCESS</h3><div>%s</div>", msg))
@@ -123,7 +124,7 @@ func SitesHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+sites+bottom))
 }
 
-// StorageHandler provide access to GET /storage endpoint
+// StorageHandler provides access to GET /storage endpoint
 func StorageHandler(c *gin.Context) {
 	tmpl := makeTmpl("Storage")
 	top := tmplPage("top.tmpl", tmpl)
@@ -137,19 +138,19 @@ func StorageHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
-// DataHandler provide access to GET /data endpoint
+// DataHandler provides access to GET /data endpoint
 func DataHandler(c *gin.Context) {
 }
 
-// DataAccessHandler provide access to GET /data/access endpoint
+// DataAccessHandler provides access to GET /data/access endpoint
 func DataAccessHandler(c *gin.Context) {
 }
 
-// SiteAccessHandler provide access to GET /site/access endpoint
+// SiteAccessHandler provides access to GET /site/access endpoint
 func SiteAccessHandler(c *gin.Context) {
 }
 
-// SiteRegistrationHandler provide access to GET /site/registration endpoint
+// SiteRegistrationHandler provides access to GET /site/registration endpoint
 func SiteRegistrationHandler(c *gin.Context) {
 	tmpl := makeTmpl("Storage")
 	top := tmplPage("top.tmpl", tmpl)
@@ -158,13 +159,76 @@ func SiteRegistrationHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
-// DataRegistrationHandler provide access to GET /data/registration endpoint
+// LoginHandler provides access to GET /login endpoint
+func LoginHandler(c *gin.Context) {
+	tmpl := makeTmpl("Login")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+	content := tmplPage("login.tmpl", tmpl)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+}
+
+// UserRegistryHandler provides access to GET /registration endpoint
+func UserRegistryHandler(c *gin.Context) {
+	tmpl := makeTmpl("User registration")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+	captchaStr := captcha.New()
+	if Config.Verbose > 0 {
+		log.Println("new captcha", captchaStr)
+	}
+	tmpl["CaptchaId"] = captchaStr
+	tmpl["CaptchaPublicKey"] = Config.CaptchaPublicKey
+	content := tmplPage("user_registration.tmpl", tmpl)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+}
+
+// DataRegistrationHandler provides access to GET /data/registration endpoint
 func DataRegistrationHandler(c *gin.Context) {
 }
 
 // POST handlers
 
-// SiteRegistrationHandler provide access to POST /site/registration endpoint
+// UserRegistationForm represents site registration form on web UI
+type UserRegistrationForm struct {
+	Name            string `form:"user"`
+	Password        string `form:"password"`
+	CaptchaID       string `form:"captchaId"`
+	CaptchaSolution string `form:"captchaSolution"`
+}
+
+// LoginPostHandler provides access to POST /login endpoint
+func LoginPostHandler(c *gin.Context) {
+}
+
+// UserRegistryHandler provides access to POST /registry endpoint
+func UserRegistryPostHandler(c *gin.Context) {
+	tmpl := makeTmpl("Storage")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+
+	// parse input form request
+	var form UserRegistrationForm
+	var err error
+	content := successTmpl("User registation is completed")
+
+	// first check if user provides the captcha
+	if !captcha.VerifyString(form.CaptchaID, form.CaptchaSolution) {
+		msg := "Wrong captcha match, robots are not allowed"
+		content = errorTmpl(msg, err)
+	}
+
+	if err = c.ShouldBind(&form); err != nil {
+		content = errorTmpl("User registration binding error", err)
+	}
+
+	// return page
+	tmpl["Content"] = template.HTML(content)
+	content = tmplPage("user_registration.tmpl", tmpl)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+}
+
+// SiteRegistrationHandler provides access to POST /site/registration endpoint
 func SiteRegistrationPostHandler(c *gin.Context) {
 	tmpl := makeTmpl("Storage")
 	top := tmplPage("top.tmpl", tmpl)
@@ -180,6 +244,7 @@ func SiteRegistrationPostHandler(c *gin.Context) {
 		if Config.Verbose > 0 {
 			log.Printf("register site %+v", form)
 		}
+
 		// encrypt sensitive fields
 		form, err = encryptSiteObject(form)
 		if err != nil {
@@ -209,6 +274,6 @@ func SiteRegistrationPostHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
-// DataRegistrationPostHandler provide access to POST /data/registration endpoint
+// DataRegistrationPostHandler provides access to POST /data/registration endpoint
 func DataRegistrationPostHandler(c *gin.Context) {
 }

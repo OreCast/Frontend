@@ -45,6 +45,11 @@ type Configuration struct {
 	DomainNames   []string `json:"domain_names"` // LetsEncrypt domain names
 	LimiterPeriod string   `json:"rate"`         // limiter rate value
 
+	// captcha parts
+	CaptchaSecretKey string `json:"captchaSecretKey"` // re-captcha secret key
+	CaptchaPublicKey string `json:"captchaPublicKey"` // re-captcha public key
+	CaptchaVerifyUrl string `json:"captchaVerifyUrl"` // re-captcha verify url
+
 	// OreCast parts
 	DiscoveryPassword string `json:"discovery_secret"` // data-discovery password
 	DiscoveryCipher   string `json:"discovery_cipher"` // data-discovery cipher

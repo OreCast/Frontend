@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/dchest/captcha"
 	"github.com/gin-gonic/gin"
 )
 
@@ -62,10 +63,20 @@ func setupRouter() *gin.Engine {
 	r.GET("/storage", StorageHandler)
 	r.GET("/site/registration", SiteRegistrationHandler)
 	r.GET("/data/registration", DataRegistrationHandler)
+	r.GET("/login", LoginHandler)
+	r.GET("/registry", UserRegistryHandler)
+
+	// captcha
+	//     http.Handle("/captcha/", captcha.Server(captcha.StdWidth, captcha.StdHeight))
+	r.GET("/captcha/", func(c *gin.Context) {
+		captcha.Server(captcha.StdWidth, captcha.StdHeight)
+	})
 
 	// POST end-poinst
 	r.POST("/site/registration", SiteRegistrationPostHandler)
 	r.POST("/data/registration", DataRegistrationPostHandler)
+	r.POST("/login", LoginPostHandler)
+	r.POST("/registry", UserRegistryPostHandler)
 
 	// static files
 	for _, dir := range []string{"js", "css", "images"} {
