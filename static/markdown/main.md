@@ -160,9 +160,11 @@ e.g.
 - 8310 provenance service
 - 8320 discovery service
 - 8330 s3 service
-- 8340 analytics service
+- 8340 data-management service
+- 8350 analytics service
 
-### MinIO references
+### References
+- [JS superkube](https://imperavi.com/superkube/)
 - [MinIO for developers](https://www.youtube.com/watch?v=gY090GEDdu8&list=PLFOIsHSSYIK37B3VtACkNksUw8_puUuAC&pp=iAQB)
 - [Data redundancy and availability with MinIO](https://www.youtube.com/watch?v=QniHMNNmbfI)
 - [Replace file system with MinIO](https://medium.com/cloud-native-daily/replace-filesystem-with-minio-golang-3148c61f2d28)
