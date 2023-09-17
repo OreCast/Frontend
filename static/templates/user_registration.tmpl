@@ -1,0 +1,30 @@
+<section>
+  <article>
+      <form class="form" action="{{.Base}}/site/registration" method="post">
+        <div class="form-item">
+            <label>Name <span class="hint hint-req">*</span></label>
+            <input class="input" type="text" name="name">
+        </div>
+        <div class="form-item">
+            <label>Password <span class="hint hint-req">*</span></label>
+            <input class="input" type="password" name="password">
+        </div>
+        <div class="form-item">
+            <p>Type the numbers you see in the picture below:</p>
+            <p><img id=image src="{{.Base}}/captcha/{{.CaptchaId}}.png" alt="Captcha image"></p>
+            <a href="#" onclick="reload()">Reload</a> | <a href="#" onclick="playAudio()">Play Audio</a>
+            <audio id=audio controls style="display:none" src="{{.Base}}/captcha/{{.CaptchaId}}.wav" preload=none>
+              You browser does not support audio.
+              <a href="{{.Base}}/captcha/download/{{.CaptchaId}}.wav">Download file</a> to play it in the external player.
+            </audio>
+            <input type=hidden name=captchaId value="{{.CaptchaId}}"><br>
+            <input name=captchaSolution>
+        </div>
+        <div class="form-item">
+            <button class="button button-primary">Save</button>
+            <button class="button">Cancel</button>
+        </div>
+    </form>
+
+  </article>
+</section>
