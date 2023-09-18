@@ -38,12 +38,7 @@ func makeTmpl(title string) TmplRecord {
 	return tmpl
 }
 
-// SiteParam defines form parameters for site call
-type SiteParams struct {
-	Site   string `form:"site"`
-	Bucket string `form:"bucket"`
-}
-
+// helper function which sets gin router and defines all our server end-points
 func setupRouter() *gin.Engine {
 	// Disable Console Color
 	// gin.DisableConsoleColor()
@@ -59,7 +54,8 @@ func setupRouter() *gin.Engine {
 	r.GET("/analytics", AnalyticsHandler)
 	r.GET("/discovery", DiscoveryHandler)
 	r.GET("/provenance", ProvenanceHandler)
-	r.GET("/storage", StorageHandler)
+	r.GET("/storage/:site", StorageHandler)
+	r.GET("/storage/:site/:bucket", StorageHandler)
 	r.GET("/site/registration", SiteRegistrationHandler)
 	r.GET("/data/registration", DataRegistrationHandler)
 	r.GET("/login", LoginHandler)
@@ -95,6 +91,7 @@ func setupRouter() *gin.Engine {
 	return r
 }
 
+// Server defines our HTTP server
 func Server(configFile string) {
 	r := setupRouter()
 	sport := fmt.Sprintf(":%d", Config.Port)

@@ -105,7 +105,7 @@ func SitesHandler(c *gin.Context) {
 	var content string
 	for _, sobj := range sites() {
 		site := sobj.Name
-		content += fmt.Sprintf("Site: <a href=\"%s/storage?site=%s\">%s</a>", Config.Base, site, site)
+		content += fmt.Sprintf("Site: <a href=\"%s/storage/%s\">%s</a>", Config.Base, site, site)
 		content += fmt.Sprintf("<br/>Storage: <a href=\"%s\">S3</a>", sobj.URL)
 		if sobj.Description != "" {
 			content += "<br/>Description: " + sobj.Description + "<hr/>"
@@ -117,7 +117,7 @@ func SitesHandler(c *gin.Context) {
 		content += "<h3>MetaData records</h3>"
 		for _, rec := range metaRecords {
 			content += fmt.Sprintf("ID: %s", rec.ID)
-			content += fmt.Sprintf("<br/>Bucket: <a href=\"%s/storage?site=%s&bucket=%s\">%s</a>", Config.Base, site, rec.Bucket, rec.Bucket)
+			content += fmt.Sprintf("<br/>Bucket: <a href=\"%s/storage/%s/%s\">%s</a>", Config.Base, site, rec.Bucket, rec.Bucket)
 			if rec.Site == site {
 				content += fmt.Sprintf("<br/>Description: %s", rec.Description)
 			}
@@ -132,16 +132,75 @@ func SitesHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+sites+bottom))
 }
 
+// StorageData represents storage data structure returned as data from DataManagement service
+type StorageData struct {
+	Site    string   `json:"site"`
+	Buckets []string `json:"buckets"`
+}
+
+// StorageInfo represents storage info structure returned by DataManagement service
+type StorageInfo struct {
+	Status string      `json:"status"`
+	Data   StorageData `json:"data"`
+	Error  string      `json:"error"`
+}
+
+// StorageParams represents URI storage params in /storage/:site/:bucket end-point
+type StorageParams struct {
+	Site   string `uri:"site" binding:"required"`
+	Bucket string `uri:"bucket"`
+}
+
 // StorageHandler provides access to GET /storage endpoint
 func StorageHandler(c *gin.Context) {
 	tmpl := makeTmpl("Storage")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
-	var params SiteParams
-	c.Bind(&params)
-	siteObj := site(params.Site, params.Bucket)
-	tmpl["Datasets"] = siteObj.Datasets
+
+	// read end-points uri parameters: /storage/:site/:bucket
+	var params StorageParams
+	err := c.ShouldBindUri(&params)
+	if err != nil {
+		msg := fmt.Sprintf("fail to bind storage parameters, error %v", err)
+		content := errorTmpl(msg, err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+
+	// place request to DataManagement service to get either site or bucket info
+	rurl := fmt.Sprintf("%s/storage/%s", Config.DataManagementURL, params.Site)
+	if params.Bucket != "" {
+		rurl = fmt.Sprintf("%s/storage/%s/%s", Config.DataManagementURL, params.Site, params.Bucket)
+	}
+	if Config.Verbose > 0 {
+		log.Println("query DataManagement", rurl)
+	}
+	resp, err := http.Get(rurl)
+	if err != nil {
+		log.Println("ERROR:", err)
+		msg := fmt.Sprintf("fail to obtain storage info, error %v", err)
+		content := errorTmpl(msg, err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	defer resp.Body.Close()
+	var sinfo StorageInfo
+	dec := json.NewDecoder(resp.Body)
+	if err := dec.Decode(&sinfo); err != nil {
+		log.Println("ERROR:", err)
+		msg := fmt.Sprintf("fail to obtain storage info, error %v", err)
+		content := errorTmpl(msg, err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	if sinfo.Status != "ok" {
+		msg := fmt.Sprintf("fail to obtain storage info, error %v", sinfo.Error)
+		content := errorTmpl(msg, nil)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
 	tmpl["Site"] = params.Site
+	tmpl["Datasets"] = sinfo.Data.Buckets
 	content := tmplPage("datasets.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
