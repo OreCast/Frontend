@@ -8,3 +8,6 @@
 - [Microservices patterns in golang](https://levelup.gitconnected.com/12-microservices-pattern-i-wish-i-knew-before-the-system-design-interview-5c35919f16a2)
 - [REST API design in golang](https://medium.com/@lordmoma/build-a-social-network-in-go-3-architecture-fd99e3647026)
  - [Go limiter libraries](https://medium.com/@insanmod/it-was-necessary-to-test-and-compare-libraries-for-rate-limiting-for-golang-b3b80e17f675)
+ - [Gin Binding in Go](https://blog.logrocket.com/gin-binding-in-go-a-tutorial-with-examples/)
+ - [Add google maps to site](https://developers.google.com/maps/documentation/javascript/adding-a-google-map#maps_add_map-javascript)
+ - [Embed Google maps](https://developers.google.com/maps/documentation/embed/embedding-map)
