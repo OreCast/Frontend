@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -93,13 +92,13 @@ func site(site, bucket string) SiteObject {
 			log.Printf("INFO: found %s in DataDiscovery records, will access its s3 via %s", rec.Name, rec.URL)
 			// bingo: we got desired site, now we can query its s3 storage for datasets
 			log.Println("###", rec.AccessKey, Config.DiscoveryPassword, Config.DiscoveryCipher)
-			akey, err := decrypt(rec.AccessKey, Config.DiscoveryPassword, Config.DiscoveryCipher)
+			akey, err := cryptoutils.HexDecrypt(rec.AccessKey, Config.DiscoveryPassword, Config.DiscoveryCipher)
 			if err != nil {
 				log.Printf("ERROR: unable to decrypt data discovery access key, error %v", err)
 				return siteObj
 
 			}
-			apwd, err := decrypt(rec.AccessSecret, Config.DiscoveryPassword, Config.DiscoveryCipher)
+			apwd, err := cryptoutils.HexDecrypt(rec.AccessSecret, Config.DiscoveryPassword, Config.DiscoveryCipher)
 			if err != nil {
 				log.Printf("ERROR: unable to decrypt data discovery acess secret, error %v", err)
 				return siteObj
@@ -124,42 +123,15 @@ func site(site, bucket string) SiteObject {
 	return siteObj
 }
 
-// helper function to decrypt site hex encoded cipher string
-func decrypt(entry, salt, cipher string) (string, error) {
-	src := []byte(entry)
-	dst := make([]byte, hex.DecodedLen(len(src)))
-	n, err := hex.Decode(dst, src)
-	if err != nil {
-		return "", err
-	}
-	data, err := cryptoutils.Decrypt(dst[:n], salt, cipher)
-	if err != nil {
-		return "", err
-	}
-	return string(data), nil
-}
-
-// helper function to encrypt entry into hex encoded cipher string
-func encrypt(entry, salt, cipher string) (string, error) {
-	data, err := cryptoutils.Encrypt([]byte(entry), salt, cipher)
-	if err != nil {
-		return "", err
-	}
-	// make hex string out of encrypted data
-	dst := make([]byte, hex.EncodedLen(len(data)))
-	hex.Encode(dst, data)
-	return string(dst), nil
-}
-
 // helper function to encrypt site attributes
 func encryptSiteObject(site Site) (Site, error) {
-	encryptedObject, err := encrypt(site.AccessKey, Config.DiscoveryPassword, Config.DiscoveryCipher)
+	encryptedObject, err := cryptoutils.HexEncrypt(site.AccessKey, Config.DiscoveryPassword, Config.DiscoveryCipher)
 	if err != nil {
 		return site, err
 	} else {
 		site.AccessKey = encryptedObject
 	}
-	encryptedObject, err = encrypt(site.AccessSecret, Config.DiscoveryPassword, Config.DiscoveryCipher)
+	encryptedObject, err = cryptoutils.HexEncrypt(site.AccessSecret, Config.DiscoveryPassword, Config.DiscoveryCipher)
 	if err != nil {
 		return site, err
 	} else {
