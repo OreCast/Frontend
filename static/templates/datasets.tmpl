@@ -2,8 +2,9 @@
   <article>
       <h2>Site: {{.Site}}</h2>
       <hr/>
-{{range $dataset := .Datasets}}
-    {{$dataset}}
+{{range $d := .Datasets}}
+    {{$d.ETag}} &nbsp; | &nbsp; {{$d.LastModified}} &nbsp; | &nbsp;
+    <a href="{{$d.Url}}">{{$d.Name}}</a>
     <br/>
 {{end}}
   </article>

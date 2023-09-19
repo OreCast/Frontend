@@ -144,12 +144,13 @@ func SitesHandler(c *gin.Context) {
 
 // StorageData represents storage data structure returned as data from DataManagement service
 type StorageData struct {
-	Site    string   `json:"site"`
-	Buckets []string `json:"buckets"`
+	Site    string           `json:"site"`
+	Bucket  string           `json:"bucket"`
+	Objects []map[string]any `json:"objects"`
 }
 
-// StorageInfo represents storage info structure returned by DataManagement service
-type StorageInfo struct {
+// BucketData represents storage info structure returned by DataManagement service
+type BucketData struct {
 	Status string      `json:"status"`
 	Data   StorageData `json:"data"`
 	Error  string      `json:"error"`
@@ -159,6 +160,15 @@ type StorageInfo struct {
 type StorageParams struct {
 	Site   string `uri:"site" binding:"required"`
 	Bucket string `uri:"bucket"`
+}
+
+// Dataset represent dataset record on orecast web UI
+type Dataset struct {
+	Name         string
+	Size         string
+	ETag         string
+	LastModified string
+	Url          string
 }
 
 // StorageHandler provides access to GET /storage endpoint
@@ -176,11 +186,13 @@ func StorageHandler(c *gin.Context) {
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
+	site := params.Site
+	bucket := params.Bucket
 
 	// place request to DataManagement service to get either site or bucket info
-	rurl := fmt.Sprintf("%s/storage/%s", Config.DataManagementURL, params.Site)
-	if params.Bucket != "" {
-		rurl = fmt.Sprintf("%s/storage/%s/%s", Config.DataManagementURL, params.Site, params.Bucket)
+	rurl := fmt.Sprintf("%s/storage/%s", Config.DataManagementURL, site)
+	if bucket != "" {
+		rurl = fmt.Sprintf("%s/storage/%s/%s", Config.DataManagementURL, site, bucket)
 	}
 	if Config.Verbose > 0 {
 		log.Println("query DataManagement", rurl)
@@ -194,23 +206,40 @@ func StorageHandler(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	var sinfo StorageInfo
+	var bdata BucketData
 	dec := json.NewDecoder(resp.Body)
-	if err := dec.Decode(&sinfo); err != nil {
+	if err := dec.Decode(&bdata); err != nil {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to obtain storage info, error %v", err)
 		content := errorTmpl(msg, err)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
-	if sinfo.Status != "ok" {
-		msg := fmt.Sprintf("fail to obtain storage info, error %v", sinfo.Error)
+	if bdata.Status != "ok" {
+		msg := fmt.Sprintf("fail to obtain storage info, error %v", bdata.Error)
 		content := errorTmpl(msg, nil)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
-	tmpl["Site"] = params.Site
-	tmpl["Datasets"] = sinfo.Data.Buckets
+	// convert storage buckets data into appropriate HTML structure
+	log.Printf("### bdata %+v", bdata)
+	var datasets []Dataset
+	for _, b := range bdata.Data.Objects {
+		val, _ := b["name"]
+		name := fmt.Sprintf("%v", val)
+		val, _ = b["etag"]
+		etag := fmt.Sprintf("%v", val)
+		val, _ = b["size"]
+		size := fmt.Sprintf("%v", val)
+		val, _ = b["lastModified"]
+		ltime := fmt.Sprintf("%v", val)
+		aurl := fmt.Sprintf("%s/storage/%s/%s/%s", Config.DataManagementURL, site, bucket, name)
+		d := Dataset{Name: name, ETag: etag, LastModified: ltime, Size: size, Url: aurl}
+		datasets = append(datasets, d)
+	}
+	tmpl["Site"] = site
+	//     tmpl["Datasets"] = bdata.Data.Objects
+	tmpl["Datasets"] = datasets
 	content := tmplPage("datasets.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
