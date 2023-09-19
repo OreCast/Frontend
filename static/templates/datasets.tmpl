@@ -29,7 +29,7 @@
             {{$d.Size}} 
         </div>
         <div class="column column-3">
-            <a href="{{$d.Url}}">{{$d.Name}}</a>
+            <a href="{{$.DataManagementURL}}/storage/{{$.Site}}/{{$.Bucket}}/{{$d.Name}}">{{$d.Name}}</a>
         </div>
     </div>
 {{end}}

@@ -156,6 +156,25 @@ type BucketData struct {
 	Error  string      `json:"error"`
 }
 
+// BucketObject represents bucket object returned by DataManagement service
+type BucketObject struct {
+	Name         string `json:"name"`
+	CreationDate string `json:"creationDate"`
+}
+
+// BucketsData represents buckets data returned as data from DataManagement service
+type BucketsData struct {
+	Site    string         `json:"site"`
+	Buckets []BucketObject `json:"buckets"`
+}
+
+// SiteBucketsData represents site buckets data returned by DataManagement service
+type SiteBucketsData struct {
+	Status string      `json:"status"`
+	Data   BucketsData `json:"data"`
+	Error  string      `json:"error"`
+}
+
 // StorageParams represents URI storage params in /storage/:site/:bucket end-point
 type StorageParams struct {
 	Site   string `uri:"site" binding:"required"`
@@ -169,11 +188,63 @@ type Dataset struct {
 	ETag         string
 	ShortETag    string
 	LastModified string
-	Url          string
 }
 
-// StorageHandler provides access to GET /storage endpoint
-func StorageHandler(c *gin.Context) {
+// SiteBucketsHandler provides access to GET /storage/:site endpoint
+func SiteBucketsHandler(c *gin.Context) {
+	tmpl := makeTmpl("Storage")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+
+	// read end-points uri parameters: /storage/:site
+	var params StorageParams
+	err := c.ShouldBindUri(&params)
+	if err != nil {
+		msg := fmt.Sprintf("fail to bind storage parameters, error %v", err)
+		content := errorTmpl(msg, err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	site := params.Site
+
+	// place request to DataManagement service to get either site or bucket info
+	rurl := fmt.Sprintf("%s/storage/%s", Config.DataManagementURL, site)
+	if Config.Verbose > 0 {
+		log.Println("query DataManagement", rurl)
+	}
+	resp, err := http.Get(rurl)
+	if err != nil {
+		log.Println("ERROR:", err)
+		msg := fmt.Sprintf("fail to obtain storage info, error %v", err)
+		content := errorTmpl(msg, err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	defer resp.Body.Close()
+	var bdata SiteBucketsData
+	dec := json.NewDecoder(resp.Body)
+	if err := dec.Decode(&bdata); err != nil {
+		log.Println("ERROR:", err)
+		msg := fmt.Sprintf("fail to obtain storage info, error %v", err)
+		content := errorTmpl(msg, err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	if bdata.Status != "ok" {
+		msg := fmt.Sprintf("fail to obtain storage info, error %v", bdata.Error)
+		content := errorTmpl(msg, nil)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	tmpl["StoragePath"] = fmt.Sprintf("/storage/%s holds %d objects", site, len(bdata.Data.Buckets))
+	tmpl["Buckets"] = bdata.Data.Buckets
+	tmpl["Site"] = site
+	content := tmplPage("buckets.tmpl", tmpl)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+}
+
+// BucketObjectsHandler provides access to GET /storage/:site/:bucket endpoint
+func BucketObjectsHandler(c *gin.Context) {
 	tmpl := makeTmpl("Storage")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
@@ -223,7 +294,6 @@ func StorageHandler(c *gin.Context) {
 		return
 	}
 	// convert storage buckets data into appropriate HTML structure
-	log.Printf("### bdata %+v", bdata)
 	var datasets []Dataset
 	for _, b := range bdata.Data.Objects {
 		val, _ := b["name"]
@@ -234,18 +304,19 @@ func StorageHandler(c *gin.Context) {
 		size := fmt.Sprintf("%v", val)
 		val, _ = b["lastModified"]
 		ltime := fmt.Sprintf("%v", val)
-		aurl := fmt.Sprintf("%s/storage/%s/%s/%s", Config.DataManagementURL, site, bucket, name)
 		d := Dataset{
 			Name:         name,
 			ETag:         etag,
 			ShortETag:    etag[:10],
 			LastModified: ltime,
-			Size:         size,
-			Url:          aurl}
+			Size:         size}
 		datasets = append(datasets, d)
 	}
 	tmpl["StoragePath"] = fmt.Sprintf("/storage/%s/%s holds %d objects", site, bucket, len(datasets))
 	tmpl["Datasets"] = datasets
+	tmpl["DataManagementURL"] = Config.DataManagementURL
+	tmpl["Site"] = site
+	tmpl["Bucket"] = bucket
 	content := tmplPage("datasets.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }

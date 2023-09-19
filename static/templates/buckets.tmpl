@@ -1,0 +1,24 @@
+<section>
+  <article>
+    <h1>{{.StoragePath}}</h1>
+    <hr/>
+    <div class="grid grid-gapless">
+        <div class="column column-4">
+            <b>Timestamp</b>
+        </div>
+        <div class="column column-8">
+            <b>Bucket</b>
+        </div>
+    </div>
+{{range $d := .Buckets}}
+    <div class="grid grid-gapless">
+        <div class="column column-4">
+            {{$d.CreationDate}}
+        </div>
+        <div class="column column-8">
+            <a href="/storage/{{$.Site}}/{{$d.Name}}">{{$d.Name}}</a>
+        </div>
+    </div>
+{{end}}
+  </article>
+</section>
