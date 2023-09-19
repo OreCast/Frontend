@@ -39,6 +39,16 @@ func CaptchaHandler() gin.HandlerFunc {
 	}
 }
 
+// IndexHandler provides access to GET / end-point
+func IndexHandler(c *gin.Context) {
+	// top and bottom HTTP content from our templates
+	tmpl := makeTmpl("OreCast home")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+	content := tmplPage("index.tmpl", tmpl)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+}
+
 // DocsHandler provides access to GET /docs end-point
 func DocsHandler(c *gin.Context) {
 	tmpl := makeTmpl("Documentation")

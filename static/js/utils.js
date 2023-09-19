@@ -26,3 +26,12 @@ function load(url) {
 function reload() {
     load(window.location.href);
 }
+function ShowMap() {
+    // clear up orecast logo
+    var id=document.getElementById('orecast-content');
+    if (id) {
+        id.innerHTML="";
+    }
+    HideTag('orecast-content');
+    ShowTag('orecast-map');
+}

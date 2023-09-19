@@ -80,14 +80,7 @@ func setupRouter() *gin.Engine {
 		r.StaticFS(m, http.FS(filesFS))
 	}
 
-	// top and bottom HTTP content from our templates
-	tmpl := makeTmpl("OreCast home")
-	top := tmplPage("top.tmpl", tmpl)
-	bottom := tmplPage("bottom.tmpl", tmpl)
-	content := tmplPage("index.tmpl", tmpl)
-	r.GET("/", func(c *gin.Context) {
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
-	})
+	r.GET("/", IndexHandler)
 	return r
 }
 
