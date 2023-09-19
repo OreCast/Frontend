@@ -111,6 +111,10 @@ footer {
 .message {
     width: 600px;
 }
+.s3-record {
+    font-family: Courier, monospace;
+    font-size: 18px;
+}
 
 /*
  * Google map settings 

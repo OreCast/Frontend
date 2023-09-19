@@ -167,6 +167,7 @@ type Dataset struct {
 	Name         string
 	Size         string
 	ETag         string
+	ShortETag    string
 	LastModified string
 	Url          string
 }
@@ -234,11 +235,16 @@ func StorageHandler(c *gin.Context) {
 		val, _ = b["lastModified"]
 		ltime := fmt.Sprintf("%v", val)
 		aurl := fmt.Sprintf("%s/storage/%s/%s/%s", Config.DataManagementURL, site, bucket, name)
-		d := Dataset{Name: name, ETag: etag, LastModified: ltime, Size: size, Url: aurl}
+		d := Dataset{
+			Name:         name,
+			ETag:         etag,
+			ShortETag:    etag[:10],
+			LastModified: ltime,
+			Size:         size,
+			Url:          aurl}
 		datasets = append(datasets, d)
 	}
-	tmpl["Site"] = site
-	//     tmpl["Datasets"] = bdata.Data.Objects
+	tmpl["StoragePath"] = fmt.Sprintf("/storage/%s/%s holds %d objects", site, bucket, len(datasets))
 	tmpl["Datasets"] = datasets
 	content := tmplPage("datasets.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
