@@ -1,8 +1,16 @@
 <section>
-  <article>
-{{range $site := .Sites}}
-    <a href="/storage?site={{$site}}">{{$site}}</a>
-    <br/>
-{{end}}
-  </article>
+    <article>
+        <div class="grid grid-gapless">
+            <div class="column column-4">
+                <b class="text-huge">Site</b>
+            </div>
+            <div class="column column-4">
+                <b class="text-huge">Storage</b>
+            </div>
+            <div class="column column-4">
+                <b class="text-huge">Records</b>
+            </div>
+        </div>
+        {{.Content}}
+    </article>
 </section>

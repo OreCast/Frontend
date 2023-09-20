@@ -1,0 +1,56 @@
+<div class="grid grid-gapless">
+    <div class="column column-4">
+        <h1 class="text-large">{{.Site}}</h1>
+    </div>
+    <div class="column column-4">
+        <a href="{{.Base}}/storage/{{.Site}}">
+          <img src="https://cdn.onlinewebfonts.com/svg/img_375537.png" alt="Storage" style="width:30px;">
+        </a>
+    </div>
+    <div class="column column-4">
+        <a href="javascript:FlipTag('{{.Site}}-records')">
+          <img src="https://cdn.onlinewebfonts.com/svg/img_371709.png" alt="Records" style="width:30px;">
+        </a>
+    </div>
+</div>
+<div class="grid grid-gapless">
+    <div class="column column-4">
+{{if .UseSSL}}
+      <img src="https://cdn.onlinewebfonts.com/svg/img_573802.png" alt="Storage" style="width:15px;">
+  {{else}}
+      <img src="https://cdn.onlinewebfonts.com/svg/img_573806.png" alt="Storage" style="width:15px;">
+{{end}}
+        {{.Description}}
+    </div>
+    <div class="column column-4">
+        S3 storage
+    </div>
+    <div class="column column-4">
+        Total {{.NRecords}} meta-data records
+    </div>
+</div>
+
+<div id="{{.Site}}-records" class="hide">
+{{range $r := .Records}}
+    ID: {{$r.ID}}
+    <br/>
+    Description: {{$r.Description}}
+    <br/>
+    Tags: {{$r.Tags}}
+    <br/>
+    <div class="card-author flex">
+        <div class="card-author-box">
+            Access link: &nbsp;
+        </div>
+        <div class="card-author-avatar mr-3">
+            <figure class="image-48">
+            <a href="/storage/{{$.Site}}/{{$r.Bucket}}">
+              <img src="https://cdn.onlinewebfonts.com/svg/img_554814.png" alt="Records" style="width:25px;">
+            </a>
+            </figure>
+        </div>
+    </div>
+    <br/>
+{{end}}
+</div>
+<hr/>

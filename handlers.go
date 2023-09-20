@@ -112,33 +112,24 @@ func SitesHandler(c *gin.Context) {
 	tmpl := makeTmpl("Sites")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
+	tmpl["Base"] = Config.Base
 	var content string
 	for _, sobj := range sites() {
 		site := sobj.Name
-		content += fmt.Sprintf("Site: <a href=\"%s/storage/%s\">%s</a>", Config.Base, site, site)
-		content += fmt.Sprintf("<br/>Storage: <a href=\"%s\">S3</a>", sobj.URL)
-		if sobj.Description != "" {
-			content += "<br/>Description: " + sobj.Description + "<hr/>"
-		}
-		metaRecords := metadata(site)
 		if Config.Verbose > 0 {
-			log.Printf("for site %s meta-data records %+v", site, metaRecords)
+			log.Printf("processing %+v", sobj)
 		}
-		content += "<h3>MetaData records</h3>"
-		for _, rec := range metaRecords {
-			content += fmt.Sprintf("ID: %s", rec.ID)
-			content += fmt.Sprintf("<br/>Bucket: <a href=\"%s/storage/%s/%s\">%s</a>", Config.Base, site, rec.Bucket, rec.Bucket)
-			if rec.Site == site {
-				content += fmt.Sprintf("<br/>Description: %s", rec.Description)
-			}
-			if len(rec.Tags) > 0 {
-				content += fmt.Sprintf("<br/>Tags: %v", rec.Tags)
-			}
-			content += "<hr/>"
-		}
+		records := metadata(site)
+		tmpl["Site"] = site
+		tmpl["Description"] = sobj.Description
+		tmpl["UseSSL"] = sobj.UseSSL
+		tmpl["Records"] = records
+		tmpl["NRecords"] = len(records)
+		siteContent := tmplPage("site_record.tmpl", tmpl)
+		content += fmt.Sprintf("%s", template.HTML(siteContent))
 	}
 	tmpl["Content"] = template.HTML(content)
-	sites := tmplPage("content.tmpl", tmpl)
+	sites := tmplPage("sites.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+sites+bottom))
 }
 
@@ -236,7 +227,7 @@ func SiteBucketsHandler(c *gin.Context) {
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
-	tmpl["StoragePath"] = fmt.Sprintf("/storage/%s holds %d objects", site, len(bdata.Data.Buckets))
+	tmpl["StoragePath"] = fmt.Sprintf("/storage/%s holds %d buckets", site, len(bdata.Data.Buckets))
 	tmpl["Buckets"] = bdata.Data.Buckets
 	tmpl["Site"] = site
 	content := tmplPage("buckets.tmpl", tmpl)
