@@ -1,8 +1,18 @@
 <section>
   <article>
     <div class="text-large">
-        <img src="https://cdn.onlinewebfonts.com/svg/img_375537.png" alt="Storage" style="width:30px;">
-        {{.StoragePath}}
+        <div class="card-author flex">
+            <div class="card-author-avatar mr-3">
+                <figure class="image-48">
+                    <img src="https://cdn.onlinewebfonts.com/svg/img_375537.png" alt="Storage" style="width:30px;">
+                </figure>
+            </div>
+            <div class="card-author-box text-huge">
+                S3 STORAGE:
+                {{.StoragePath}}
+                holds {{.NBuckets}} objects
+            </div>
+        </div>
     </div>
     <hr/>
     <div class="grid grid-gapless">

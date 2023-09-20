@@ -15,6 +15,75 @@ import (
 // Documentation about gib handlers can be found over here:
 // https://go.dev/doc/tutorial/web-service-gin
 
+//
+// Data structure we use through the code
+//
+
+// BucketObject represents bucket object returned by DataManagement service
+type BucketObject struct {
+	Name         string `json:"name"`
+	CreationDate string `json:"creationDate"`
+}
+
+// BucketsData represents buckets data returned as data from DataManagement service
+type BucketsData struct {
+	Site    string         `json:"site"`
+	Buckets []BucketObject `json:"buckets"`
+}
+
+// SiteBucketsData represents site buckets data returned by DataManagement service
+type SiteBucketsData struct {
+	Status string      `json:"status"`
+	Data   BucketsData `json:"data"`
+	Error  string      `json:"error"`
+}
+
+// StorageParams represents URI storage params in /storage/:site/:bucket end-point
+type StorageParams struct {
+	Site   string `uri:"site" binding:"required"`
+	Bucket string `uri:"bucket"`
+}
+
+// Dataset represent dataset record on orecast web UI
+type Dataset struct {
+	Name         string
+	Size         string
+	ETag         string
+	ShortETag    string
+	LastModified string
+}
+
+// StorageData represents storage data structure returned as data from DataManagement service
+type StorageData struct {
+	Site    string           `json:"site"`
+	Bucket  string           `json:"bucket"`
+	Objects []map[string]any `json:"objects"`
+}
+
+// BucketData represents storage info structure returned by DataManagement service
+type BucketData struct {
+	Status string      `json:"status"`
+	Data   StorageData `json:"data"`
+	Error  string      `json:"error"`
+}
+
+// UserRegistationForm represents site registration form on web UI
+type UserRegistrationForm struct {
+	Name            string `form:"user"`
+	Password        string `form:"password"`
+	CaptchaID       string `form:"captchaId"`
+	CaptchaSolution string `form:"captchaSolution"`
+}
+
+// MetaSiteParams represents URI storage params in /meta/:site end-point
+type MetaSiteParams struct {
+	Site string `uri:"site" binding:"required"`
+}
+
+//
+// helper functions
+//
+
 // helper function to provides error template message
 func errorTmpl(msg string, err error) string {
 	tmpl := makeTmpl("Status")
@@ -30,6 +99,10 @@ func successTmpl(msg string) string {
 	content := tmplPage("success.tmpl", tmpl)
 	return content
 }
+
+//
+// GET handlers
+//
 
 // CaptchaHandler provides access to captcha server
 func CaptchaHandler() gin.HandlerFunc {
@@ -107,6 +180,46 @@ func ProvenanceHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
+// MetaSiteHandler provides access to GET /meta/:site endpoint
+func MetaSiteHandler(c *gin.Context) {
+	tmpl := makeTmpl("Sites")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+	tmpl["Base"] = Config.Base
+	var params MetaSiteParams
+	if err := c.ShouldBindUri(&params); err != nil {
+		msg := fmt.Sprintf("fail to bind meta/:site parameters, error %v", err)
+		content := errorTmpl(msg, err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+
+	site := params.Site
+	var records []MetaData
+	for _, sobj := range sites() {
+		if site == sobj.Name {
+			if Config.Verbose > 0 {
+				log.Printf("processing %+v", sobj)
+			}
+			tmpl["Description"] = sobj.Description
+			tmpl["UseSSL"] = sobj.UseSSL
+			rec := metadata(site)
+			if rec.Status == "ok" {
+				for _, r := range rec.Data {
+					records = append(records, r)
+				}
+			} else {
+				log.Printf("WARNING: failed metadata record %+v", rec)
+			}
+		}
+	}
+	tmpl["Site"] = site
+	tmpl["Records"] = records
+	tmpl["NRecords"] = len(records)
+	meta := tmplPage("meta_records.tmpl", tmpl)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+meta+bottom))
+}
+
 // SiteHandler provides access to GET /sites endpoint
 func SitesHandler(c *gin.Context) {
 	tmpl := makeTmpl("Sites")
@@ -119,74 +232,17 @@ func SitesHandler(c *gin.Context) {
 		if Config.Verbose > 0 {
 			log.Printf("processing %+v", sobj)
 		}
-		var records []MetaData
 		rec := metadata(site)
-		if rec.Status == "ok" {
-			for _, r := range rec.Data {
-				records = append(records, r)
-			}
-		} else {
-			log.Printf("WARNING: failed metadata record %+v", rec)
-		}
 		tmpl["Site"] = site
 		tmpl["Description"] = sobj.Description
 		tmpl["UseSSL"] = sobj.UseSSL
-		tmpl["Records"] = records
-		tmpl["NRecords"] = len(records)
+		tmpl["NRecords"] = len(rec.Data)
 		siteContent := tmplPage("site_record.tmpl", tmpl)
 		content += fmt.Sprintf("%s", template.HTML(siteContent))
 	}
 	tmpl["Content"] = template.HTML(content)
 	sites := tmplPage("sites.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+sites+bottom))
-}
-
-// StorageData represents storage data structure returned as data from DataManagement service
-type StorageData struct {
-	Site    string           `json:"site"`
-	Bucket  string           `json:"bucket"`
-	Objects []map[string]any `json:"objects"`
-}
-
-// BucketData represents storage info structure returned by DataManagement service
-type BucketData struct {
-	Status string      `json:"status"`
-	Data   StorageData `json:"data"`
-	Error  string      `json:"error"`
-}
-
-// BucketObject represents bucket object returned by DataManagement service
-type BucketObject struct {
-	Name         string `json:"name"`
-	CreationDate string `json:"creationDate"`
-}
-
-// BucketsData represents buckets data returned as data from DataManagement service
-type BucketsData struct {
-	Site    string         `json:"site"`
-	Buckets []BucketObject `json:"buckets"`
-}
-
-// SiteBucketsData represents site buckets data returned by DataManagement service
-type SiteBucketsData struct {
-	Status string      `json:"status"`
-	Data   BucketsData `json:"data"`
-	Error  string      `json:"error"`
-}
-
-// StorageParams represents URI storage params in /storage/:site/:bucket end-point
-type StorageParams struct {
-	Site   string `uri:"site" binding:"required"`
-	Bucket string `uri:"bucket"`
-}
-
-// Dataset represent dataset record on orecast web UI
-type Dataset struct {
-	Name         string
-	Size         string
-	ETag         string
-	ShortETag    string
-	LastModified string
 }
 
 // SiteBucketsHandler provides access to GET /storage/:site endpoint
@@ -235,8 +291,9 @@ func SiteBucketsHandler(c *gin.Context) {
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
-	tmpl["StoragePath"] = fmt.Sprintf("/storage/%s holds %d buckets", site, len(bdata.Data.Buckets))
+	tmpl["StoragePath"] = fmt.Sprintf("/storage/%s", site)
 	tmpl["Buckets"] = bdata.Data.Buckets
+	tmpl["NBuckets"] = len(bdata.Data.Buckets)
 	tmpl["Site"] = site
 	content := tmplPage("buckets.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
@@ -370,14 +427,6 @@ func DataRegistrationHandler(c *gin.Context) {
 }
 
 // POST handlers
-
-// UserRegistationForm represents site registration form on web UI
-type UserRegistrationForm struct {
-	Name            string `form:"user"`
-	Password        string `form:"password"`
-	CaptchaID       string `form:"captchaId"`
-	CaptchaSolution string `form:"captchaSolution"`
-}
 
 // LoginPostHandler provides access to POST /login endpoint
 func LoginPostHandler(c *gin.Context) {

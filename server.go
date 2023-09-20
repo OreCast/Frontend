@@ -54,6 +54,7 @@ func setupRouter() *gin.Engine {
 	r.GET("/analytics", AnalyticsHandler)
 	r.GET("/discovery", DiscoveryHandler)
 	r.GET("/provenance", ProvenanceHandler)
+	r.GET("/meta/:site", MetaSiteHandler)
 	r.GET("/storage/:site", SiteBucketsHandler)
 	r.GET("/storage/:site/:bucket", BucketObjectsHandler)
 	r.GET("/site/registration", SiteRegistrationHandler)
