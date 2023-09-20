@@ -119,7 +119,15 @@ func SitesHandler(c *gin.Context) {
 		if Config.Verbose > 0 {
 			log.Printf("processing %+v", sobj)
 		}
-		records := metadata(site)
+		var records []MetaData
+		rec := metadata(site)
+		if rec.Status == "ok" {
+			for _, r := range rec.Data {
+				records = append(records, r)
+			}
+		} else {
+			log.Printf("WARNING: failed metadata record %+v", rec)
+		}
 		tmpl["Site"] = site
 		tmpl["Description"] = sobj.Description
 		tmpl["UseSSL"] = sobj.UseSSL

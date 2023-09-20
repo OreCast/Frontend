@@ -17,12 +17,20 @@ type MetaData struct {
 	Bucket      string   `json:"bucket"`
 }
 
+// MetaDataRecord represents MetaData record returned by discovery service
+type MetaDataRecord struct {
+	Status string     `json:"status"`
+	Data   []MetaData `json:"data"`
+}
+
 // helper function to fetch sites info from discovery service
-func metadata(site string) []MetaData {
-	var results []MetaData
-	rurl := fmt.Sprintf("%s/meta?site=%s", Config.MetaDataURL, site)
+func metadata(site string) MetaDataRecord {
+	var results MetaDataRecord
+	rurl := fmt.Sprintf("%s/meta/%s", Config.MetaDataURL, site)
 	resp, err := http.Get(rurl)
-	log.Println("### rurl", rurl, err)
+	if Config.Verbose > 0 {
+		log.Println("query MetaData service rurl", rurl, err)
+	}
 	if err != nil {
 		log.Println("ERROR:", err)
 		return results
