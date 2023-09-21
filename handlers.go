@@ -377,6 +377,18 @@ func BucketObjectsHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
+// S3CreateHandler provides access to GET /data endpoint
+func S3CreateHandler(c *gin.Context) {
+}
+
+// S3UploadHandler provides access to GET /data endpoint
+func S3UploadHandler(c *gin.Context) {
+}
+
+// S3DeleteHandler provides access to GET /data endpoint
+func S3DeleteHandler(c *gin.Context) {
+}
+
 // DataHandler provides access to GET /data endpoint
 func DataHandler(c *gin.Context) {
 }
