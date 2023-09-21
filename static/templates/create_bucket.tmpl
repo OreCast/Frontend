@@ -1,0 +1,27 @@
+<section>
+  <article>
+      <h1 class="text-huge">
+          CREATE BUCKET AT S3 STORAGE
+      </h1>
+      <br/>
+      <form class="form" action="{{.Base}}/storage/create" method="post">
+        <div class="form-item">
+            <label>Site Name <span class="hint hint-req">*</span></label>
+            <input class="input" type="text" name="site" value="{{.Site}}">
+        </div>
+        <div class="form-item">
+            <label>Bucket Name <span class="hint hint-req">*</span></label>
+            <input class="input" type="text" name="name">
+        </div>
+        <div class="form-item">
+            <label>MetaData record ID<span class="hint hint-req">*</span></label>
+            <input class="input" type="text" name="meta-id">
+        </div>
+        <div class="form-item">
+            <button class="button button-primary">Create</button>
+            <button class="button">Cancel</button>
+        </div>
+    </form>
+
+  </article>
+</section>

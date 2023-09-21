@@ -1,0 +1,27 @@
+<section>
+  <article>
+      <h1 class="text-huge">
+          UPLOAD DATA TO S3 STORAGE
+      </h1>
+      <br/>
+      <form class="form" action="{{.Base}}/storage/upload" method="post">
+        <div class="form-item">
+            <label>Site Name <span class="hint hint-req">*</span></label>
+            <input class="input" type="text" name="site" value="{{.Site}}">
+        </div>
+        <div class="form-item">
+            <label>Bucket Name <span class="hint hint-req">*</span></label>
+            <input class="input" type="text" name="name">
+        </div>
+        <div class="form-item">
+            <label>File name<span class="hint hint-req">*</span></label>
+            <input class="input" type="text" name="meta-id">
+        </div>
+        <div class="form-item">
+            <button class="button button-primary">Upload</button>
+            <button class="button">Cancel</button>
+        </div>
+    </form>
+
+  </article>
+</section>
