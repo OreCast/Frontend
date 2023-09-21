@@ -73,6 +73,9 @@ func setupRouter() *gin.Engine {
 	r.POST("/data/registration", DataRegistrationPostHandler)
 	r.POST("/login", LoginPostHandler)
 	r.POST("/registry", UserRegistryPostHandler)
+	r.POST("/storage/create", S3CreatePostHandler)
+	r.POST("/storage/upload", S3UploadPostHandler)
+	r.POST("/storage/delete", S3DeletePostHandler)
 
 	// static files
 	for _, dir := range []string{"js", "css", "images"} {

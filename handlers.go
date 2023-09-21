@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/dchest/captcha"
 	"github.com/gin-gonic/gin"
@@ -73,6 +75,12 @@ type UserRegistrationForm struct {
 	Password        string `form:"password"`
 	CaptchaID       string `form:"captchaId"`
 	CaptchaSolution string `form:"captchaSolution"`
+}
+
+// CreateBucketForm represents create buccket registration form on web UI
+type CreateBucketForm struct {
+	Site   string `form:"site"`
+	Bucket string `form:"bucket"`
 }
 
 // MetaSiteParams represents URI storage params in /meta/:site end-point
@@ -377,7 +385,7 @@ func BucketObjectsHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
-// S3CreateHandler provides access to GET /data endpoint
+// S3CreateHandler provides access to GET /storage/create endpoint
 func S3CreateHandler(c *gin.Context) {
 	tmpl := makeTmpl("Create bucket")
 	top := tmplPage("top.tmpl", tmpl)
@@ -393,7 +401,7 @@ func S3CreateHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
-// S3UploadHandler provides access to GET /data endpoint
+// S3UploadHandler provides access to GET /storage/upload endpoint
 func S3UploadHandler(c *gin.Context) {
 	tmpl := makeTmpl("Upload data")
 	top := tmplPage("top.tmpl", tmpl)
@@ -409,7 +417,7 @@ func S3UploadHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
-// S3DeleteHandler provides access to GET /data endpoint
+// S3DeleteHandler provides access to GET /storage/delete endpoint
 func S3DeleteHandler(c *gin.Context) {
 	tmpl := makeTmpl("Delete bucket")
 	top := tmplPage("top.tmpl", tmpl)
@@ -427,14 +435,17 @@ func S3DeleteHandler(c *gin.Context) {
 
 // DataHandler provides access to GET /data endpoint
 func DataHandler(c *gin.Context) {
+	c.String(400, "Not implemented yet")
 }
 
 // DataAccessHandler provides access to GET /data/access endpoint
 func DataAccessHandler(c *gin.Context) {
+	c.String(400, "Not implemented yet")
 }
 
 // SiteAccessHandler provides access to GET /site/access endpoint
 func SiteAccessHandler(c *gin.Context) {
+	c.String(400, "Not implemented yet")
 }
 
 // SiteRegistrationHandler provides access to GET /site/registration endpoint
@@ -472,12 +483,115 @@ func UserRegistryHandler(c *gin.Context) {
 
 // DataRegistrationHandler provides access to GET /data/registration endpoint
 func DataRegistrationHandler(c *gin.Context) {
+	c.String(400, "Not implemented yet")
 }
 
 // POST handlers
 
 // LoginPostHandler provides access to POST /login endpoint
 func LoginPostHandler(c *gin.Context) {
+	c.String(400, "Not implemented yet")
+}
+
+// S3CreatePostHandler provides access to POST /storage/create endpoint
+func S3CreatePostHandler(c *gin.Context) {
+	tmpl := makeTmpl("Storage create bucket")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+	var form CreateBucketForm
+	var content string
+	var err error
+
+	if err = c.ShouldBind(&form); err != nil {
+		content = errorTmpl("site bucket create binding error", err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	site := form.Site
+	bucket := form.Bucket
+	// curl -X POST http://localhost:8340/storage/cornell/s3-bucket
+	rurl := fmt.Sprintf("%s/storage/%s/%s", Config.DataManagementURL, site, bucket)
+	if Config.Verbose > 0 {
+		log.Println("query DataManagement", rurl)
+	}
+	resp, err := http.PostForm(rurl, url.Values{})
+	if err != nil {
+		log.Println("ERROR:", err)
+		msg := fmt.Sprintf("fail to create bucket %s at site %s, error %v", bucket, site, err)
+		content := errorTmpl(msg, err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	defer resp.Body.Close()
+
+	msg := fmt.Sprintf("New bucket %s at site %s successfully created, response status %s", bucket, site, resp.Status)
+	if resp.Status == "200 OK" {
+		content = successTmpl(msg)
+	} else {
+		respBody, err := io.ReadAll(resp.Body)
+		msg = fmt.Sprintf("failed response %+v", respBody)
+		content = errorTmpl(msg, err)
+	}
+	tmpl["Content"] = template.HTML(content)
+	content = tmplPage("content.tmpl", tmpl)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+}
+
+// S3UploadPostHandler provides access to POST /storage/upload endpoint
+func S3UploadPostHandler(c *gin.Context) {
+	c.String(400, "Not implemented yet")
+}
+
+// S3DeletePostHandler provides access to POST /storage/delete endpoint
+func S3DeletePostHandler(c *gin.Context) {
+	tmpl := makeTmpl("Storage create bucket")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+	var form CreateBucketForm
+	var content string
+	var err error
+
+	if err = c.ShouldBind(&form); err != nil {
+		content = errorTmpl("site bucket delete binding error", err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	site := form.Site
+	bucket := form.Bucket
+	// curl -X DELETE http://localhost:8340/storage/cornell/s3-bucket
+	rurl := fmt.Sprintf("%s/storage/%s/%s", Config.DataManagementURL, site, bucket)
+	if Config.Verbose > 0 {
+		log.Println("query DataManagement", rurl)
+	}
+	req, err := http.NewRequest("DELETE", rurl, nil)
+	if err != nil {
+		log.Println("ERROR:", err)
+		msg := fmt.Sprintf("fail to delete bucket %s at site %s, error %v", bucket, site, err)
+		content := errorTmpl(msg, err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("ERROR:", err)
+		msg := fmt.Sprintf("fail to delete bucket %s at site %s, error %v", bucket, site, err)
+		content := errorTmpl(msg, err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	defer resp.Body.Close()
+	msg := fmt.Sprintf("Bucket %s at site %s successfully deleted, response status %s", bucket, site, resp.Status)
+	if resp.Status == "200 OK" {
+		content = successTmpl(msg)
+	} else {
+		respBody, err := io.ReadAll(resp.Body)
+		msg = fmt.Sprintf("failed response %+v", respBody)
+		content = errorTmpl(msg, err)
+	}
+	tmpl["Content"] = template.HTML(content)
+	content = tmplPage("content.tmpl", tmpl)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
 // UserRegistryHandler provides access to POST /registry endpoint
@@ -555,4 +669,5 @@ func SiteRegistrationPostHandler(c *gin.Context) {
 
 // DataRegistrationPostHandler provides access to POST /data/registration endpoint
 func DataRegistrationPostHandler(c *gin.Context) {
+	c.String(400, "Not implemented yet")
 }
