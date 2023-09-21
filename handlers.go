@@ -379,14 +379,50 @@ func BucketObjectsHandler(c *gin.Context) {
 
 // S3CreateHandler provides access to GET /data endpoint
 func S3CreateHandler(c *gin.Context) {
+	tmpl := makeTmpl("Create bucket")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+	var params StorageParams
+	var content string
+	if err := c.ShouldBindUri(&params); err == nil {
+		tmpl["Site"] = params.Site
+		content = tmplPage("create_bucket.tmpl", tmpl)
+	} else {
+		content = errorTmpl("binding error", err)
+	}
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
 // S3UploadHandler provides access to GET /data endpoint
 func S3UploadHandler(c *gin.Context) {
+	tmpl := makeTmpl("Upload data")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+	var params StorageParams
+	var content string
+	if err := c.ShouldBindUri(&params); err == nil {
+		tmpl["Site"] = params.Site
+		content = tmplPage("upload_data.tmpl", tmpl)
+	} else {
+		content = errorTmpl("binding error", err)
+	}
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
 // S3DeleteHandler provides access to GET /data endpoint
 func S3DeleteHandler(c *gin.Context) {
+	tmpl := makeTmpl("Delete bucket")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+	var params StorageParams
+	var content string
+	if err := c.ShouldBindUri(&params); err == nil {
+		tmpl["Site"] = params.Site
+		content = tmplPage("delete_bucket.tmpl", tmpl)
+	} else {
+		content = errorTmpl("binding error", err)
+	}
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
 // DataHandler provides access to GET /data endpoint
