@@ -115,6 +115,9 @@ footer {
     font-family: Courier, monospace;
     font-size: 18px;
 }
+.min-height {
+    min-height: 600px;
+}
 
 /*
  * Google map settings 

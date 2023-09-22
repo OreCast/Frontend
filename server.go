@@ -64,6 +64,10 @@ func setupRouter() *gin.Engine {
 	r.GET("/data/registration", DataRegistrationHandler)
 	r.GET("/login", LoginHandler)
 	r.GET("/registry", UserRegistryHandler)
+	r.GET("/meta/:site/upload", MetaUploadHandler)
+	r.GET("/meta/:site/delete", MetaDeleteHandler)
+	r.GET("/data/:site/upload", DataUploadHandler)
+	r.GET("/data/:site/delete", DataDeleteHandler)
 
 	// captcha access
 	r.GET("/captcha/:file", CaptchaHandler())
@@ -76,6 +80,10 @@ func setupRouter() *gin.Engine {
 	r.POST("/storage/create", S3CreatePostHandler)
 	r.POST("/storage/upload", S3UploadPostHandler)
 	r.POST("/storage/delete", S3DeletePostHandler)
+	r.POST("/meta/upload", MetaUploadPostHandler)
+	r.POST("/meta/delete", MetaDeletePostHandler)
+	r.POST("/data/upload", DataUploadPostHandler)
+	r.POST("/data/delete", DataDeletePostHandler)
 
 	// static files
 	for _, dir := range []string{"js", "css", "images"} {

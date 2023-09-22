@@ -376,9 +376,10 @@ func BucketObjectsHandler(c *gin.Context) {
 			Size:         size}
 		datasets = append(datasets, d)
 	}
-	tmpl["StoragePath"] = fmt.Sprintf("/storage/%s/%s holds %d objects", site, bucket, len(datasets))
+	tmpl["StoragePath"] = fmt.Sprintf("/storage/%s/%s", site, bucket)
 	tmpl["Datasets"] = datasets
 	tmpl["DataManagementURL"] = Config.DataManagementURL
+	tmpl["NObjects"] = len(datasets)
 	tmpl["Site"] = site
 	tmpl["Bucket"] = bucket
 	content := tmplPage("datasets.tmpl", tmpl)
@@ -486,10 +487,50 @@ func DataRegistrationHandler(c *gin.Context) {
 	c.String(400, "Not implemented yet")
 }
 
+// MetaUploadHandler provides access to GET /meta/upload endpoint
+func MetaUploadHandler(c *gin.Context) {
+	c.String(400, "Not implemented yet")
+}
+
+// MetaDeleteHandler provides access to GET /meta/delete endpoint
+func MetaDeleteHandler(c *gin.Context) {
+	c.String(400, "Not implemented yet")
+}
+
+// DataUploadHandler provides access to GET /data/upload endpoint
+func DataUploadHandler(c *gin.Context) {
+	c.String(400, "Not implemented yet")
+}
+
+// DataDeleteHandler provides access to GET /data/delete endpoint
+func DataDeleteHandler(c *gin.Context) {
+	c.String(400, "Not implemented yet")
+}
+
 // POST handlers
 
 // LoginPostHandler provides access to POST /login endpoint
 func LoginPostHandler(c *gin.Context) {
+	c.String(400, "Not implemented yet")
+}
+
+// MetaUploadPostHandler provides access to POST /meta/upload endpoint
+func MetaUploadPostHandler(c *gin.Context) {
+	c.String(400, "Not implemented yet")
+}
+
+// MetaDeletePostHandler provides access to POST /meta/delete endpoint
+func MetaDeletePostHandler(c *gin.Context) {
+	c.String(400, "Not implemented yet")
+}
+
+// DataUploadPostHandler provides access to POST /data/upload endpoint
+func DataUploadPostHandler(c *gin.Context) {
+	c.String(400, "Not implemented yet")
+}
+
+// DataDeletePostHandler provides access to POST /data/delete endpoint
+func DataDeletePostHandler(c *gin.Context) {
 	c.String(400, "Not implemented yet")
 }
 
