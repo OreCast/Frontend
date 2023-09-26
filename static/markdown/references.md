@@ -11,3 +11,6 @@
  - [Gin Binding in Go](https://blog.logrocket.com/gin-binding-in-go-a-tutorial-with-examples/)
  - [Add google maps to site](https://developers.google.com/maps/documentation/javascript/adding-a-google-map#maps_add_map-javascript)
  - [Embed Google maps](https://developers.google.com/maps/documentation/embed/embedding-map)
+ - [OAuth 2.0 vs OpenID Connect vs SAML](https://www.okta.com/identity-101/whats-the-difference-between-oauth-openid-connect-and-saml/)
+ - [casdoor Go Auth framework](https://github.com/casdoor/casdoor)
+ - [Go Auth](https://www.jetbrains.com/go/guide/tutorials/authentication-for-go-apps/auth/)
