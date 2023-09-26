@@ -77,7 +77,13 @@ type UserRegistrationForm struct {
 	CaptchaSolution string `form:"captchaSolution"`
 }
 
-// CreateBucketForm represents create buccket registration form on web UI
+// LoginForm represents login form
+type LoginForm struct {
+	User     string `form:"user" binding:"required"`
+	Password string `form:"password" binding:"required"`
+}
+
+// CreateBucketForm represents create bucket registration form on web UI
 type CreateBucketForm struct {
 	Site   string `form:"site"`
 	Bucket string `form:"bucket"`
@@ -93,16 +99,16 @@ type MetaSiteParams struct {
 //
 
 // helper function to provides error template message
-func errorTmpl(msg string, err error) string {
-	tmpl := makeTmpl("Status")
+func errorTmpl(c *gin.Context, msg string, err error) string {
+	tmpl := makeTmpl(c, "Status")
 	tmpl["Content"] = template.HTML(fmt.Sprintf("<div>%s</div>\n<br/><h3>ERROR</h3>%v", msg, err))
 	content := tmplPage("error.tmpl", tmpl)
 	return content
 }
 
 // helper functiont to provides success template message
-func successTmpl(msg string) string {
-	tmpl := makeTmpl("Status")
+func successTmpl(c *gin.Context, msg string) string {
+	tmpl := makeTmpl(c, "Status")
 	tmpl["Content"] = template.HTML(fmt.Sprintf("<h3>SUCCESS</h3><div>%s</div>", msg))
 	content := tmplPage("success.tmpl", tmpl)
 	return content
@@ -122,8 +128,13 @@ func CaptchaHandler() gin.HandlerFunc {
 
 // IndexHandler provides access to GET / end-point
 func IndexHandler(c *gin.Context) {
+	// check if user cookie is set, this is necessary as we do not
+	// use authorization handler for / end-point
+	if user, err := c.Cookie("user"); err == nil {
+		c.Set("user", user)
+	}
 	// top and bottom HTTP content from our templates
-	tmpl := makeTmpl("OreCast home")
+	tmpl := makeTmpl(c, "OreCast home")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	content := tmplPage("index.tmpl", tmpl)
@@ -132,7 +143,12 @@ func IndexHandler(c *gin.Context) {
 
 // DocsHandler provides access to GET /docs end-point
 func DocsHandler(c *gin.Context) {
-	tmpl := makeTmpl("Documentation")
+	// check if user cookie is set, this is necessary as we do not
+	// use authorization handler for /docs end-point
+	if user, err := c.Cookie("user"); err == nil {
+		c.Set("user", user)
+	}
+	tmpl := makeTmpl(c, "Documentation")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	tmpl["Title"] = "OreCast documentation"
@@ -150,7 +166,7 @@ func DocsHandler(c *gin.Context) {
 
 // MetaDataHandler provides access to GET /meta endpoint
 func MetaDataHandler(c *gin.Context) {
-	tmpl := makeTmpl("MetaData")
+	tmpl := makeTmpl(c, "MetaData")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	tmpl["Content"] = "OreCast MetaData page"
@@ -160,7 +176,7 @@ func MetaDataHandler(c *gin.Context) {
 
 // DiscoveryHandler provides access to GET /discovery endpoint
 func DiscoveryHandler(c *gin.Context) {
-	tmpl := makeTmpl("Discovery")
+	tmpl := makeTmpl(c, "Discovery")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	tmpl["Content"] = "OreCast discovery"
@@ -170,7 +186,7 @@ func DiscoveryHandler(c *gin.Context) {
 
 // AnalyticsHandler provides access to GET /analytics endpoint
 func AnalyticsHandler(c *gin.Context) {
-	tmpl := makeTmpl("Analytics")
+	tmpl := makeTmpl(c, "Analytics")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	tmpl["Content"] = "OreCast analytics page"
@@ -180,7 +196,7 @@ func AnalyticsHandler(c *gin.Context) {
 
 // ProvenanceHandler provides access to GET /provenance endpoint
 func ProvenanceHandler(c *gin.Context) {
-	tmpl := makeTmpl("Provenance")
+	tmpl := makeTmpl(c, "Provenance")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	tmpl["Content"] = "OreCast provenant page"
@@ -190,14 +206,14 @@ func ProvenanceHandler(c *gin.Context) {
 
 // MetaSiteHandler provides access to GET /meta/:site endpoint
 func MetaSiteHandler(c *gin.Context) {
-	tmpl := makeTmpl("Sites")
+	tmpl := makeTmpl(c, "Sites")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	tmpl["Base"] = Config.Base
 	var params MetaSiteParams
 	if err := c.ShouldBindUri(&params); err != nil {
 		msg := fmt.Sprintf("fail to bind meta/:site parameters, error %v", err)
-		content := errorTmpl(msg, err)
+		content := errorTmpl(c, msg, err)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
@@ -230,7 +246,7 @@ func MetaSiteHandler(c *gin.Context) {
 
 // SiteHandler provides access to GET /sites endpoint
 func SitesHandler(c *gin.Context) {
-	tmpl := makeTmpl("Sites")
+	tmpl := makeTmpl(c, "Sites")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	tmpl["Base"] = Config.Base
@@ -255,7 +271,7 @@ func SitesHandler(c *gin.Context) {
 
 // SiteBucketsHandler provides access to GET /storage/:site endpoint
 func SiteBucketsHandler(c *gin.Context) {
-	tmpl := makeTmpl("Storage")
+	tmpl := makeTmpl(c, "Storage")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 
@@ -264,7 +280,7 @@ func SiteBucketsHandler(c *gin.Context) {
 	err := c.ShouldBindUri(&params)
 	if err != nil {
 		msg := fmt.Sprintf("fail to bind storage parameters, error %v", err)
-		content := errorTmpl(msg, err)
+		content := errorTmpl(c, msg, err)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
@@ -279,7 +295,7 @@ func SiteBucketsHandler(c *gin.Context) {
 	if err != nil {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to obtain storage info, error %v", err)
-		content := errorTmpl(msg, err)
+		content := errorTmpl(c, msg, err)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
@@ -289,13 +305,13 @@ func SiteBucketsHandler(c *gin.Context) {
 	if err := dec.Decode(&bdata); err != nil {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to obtain storage info, error %v", err)
-		content := errorTmpl(msg, err)
+		content := errorTmpl(c, msg, err)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	if bdata.Status != "ok" {
 		msg := fmt.Sprintf("fail to obtain storage info, error %v", bdata.Error)
-		content := errorTmpl(msg, nil)
+		content := errorTmpl(c, msg, nil)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
@@ -309,7 +325,7 @@ func SiteBucketsHandler(c *gin.Context) {
 
 // BucketObjectsHandler provides access to GET /storage/:site/:bucket endpoint
 func BucketObjectsHandler(c *gin.Context) {
-	tmpl := makeTmpl("Storage")
+	tmpl := makeTmpl(c, "Storage")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 
@@ -318,7 +334,7 @@ func BucketObjectsHandler(c *gin.Context) {
 	err := c.ShouldBindUri(&params)
 	if err != nil {
 		msg := fmt.Sprintf("fail to bind storage parameters, error %v", err)
-		content := errorTmpl(msg, err)
+		content := errorTmpl(c, msg, err)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
@@ -337,7 +353,7 @@ func BucketObjectsHandler(c *gin.Context) {
 	if err != nil {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to obtain storage info, error %v", err)
-		content := errorTmpl(msg, err)
+		content := errorTmpl(c, msg, err)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
@@ -347,13 +363,13 @@ func BucketObjectsHandler(c *gin.Context) {
 	if err := dec.Decode(&bdata); err != nil {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to obtain storage info, error %v", err)
-		content := errorTmpl(msg, err)
+		content := errorTmpl(c, msg, err)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	if bdata.Status != "ok" {
 		msg := fmt.Sprintf("fail to obtain storage info, error %v", bdata.Error)
-		content := errorTmpl(msg, nil)
+		content := errorTmpl(c, msg, nil)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
@@ -388,7 +404,7 @@ func BucketObjectsHandler(c *gin.Context) {
 
 // S3CreateHandler provides access to GET /storage/create endpoint
 func S3CreateHandler(c *gin.Context) {
-	tmpl := makeTmpl("Create bucket")
+	tmpl := makeTmpl(c, "Create bucket")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	var params StorageParams
@@ -397,14 +413,14 @@ func S3CreateHandler(c *gin.Context) {
 		tmpl["Site"] = params.Site
 		content = tmplPage("create_bucket.tmpl", tmpl)
 	} else {
-		content = errorTmpl("binding error", err)
+		content = errorTmpl(c, "binding error", err)
 	}
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
 // S3UploadHandler provides access to GET /storage/upload endpoint
 func S3UploadHandler(c *gin.Context) {
-	tmpl := makeTmpl("Upload data")
+	tmpl := makeTmpl(c, "Upload data")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	var params StorageParams
@@ -413,14 +429,14 @@ func S3UploadHandler(c *gin.Context) {
 		tmpl["Site"] = params.Site
 		content = tmplPage("upload_data.tmpl", tmpl)
 	} else {
-		content = errorTmpl("binding error", err)
+		content = errorTmpl(c, "binding error", err)
 	}
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
 // S3DeleteHandler provides access to GET /storage/delete endpoint
 func S3DeleteHandler(c *gin.Context) {
-	tmpl := makeTmpl("Delete bucket")
+	tmpl := makeTmpl(c, "Delete bucket")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	var params StorageParams
@@ -429,7 +445,7 @@ func S3DeleteHandler(c *gin.Context) {
 		tmpl["Site"] = params.Site
 		content = tmplPage("delete_bucket.tmpl", tmpl)
 	} else {
-		content = errorTmpl("binding error", err)
+		content = errorTmpl(c, "binding error", err)
 	}
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
@@ -451,7 +467,7 @@ func SiteAccessHandler(c *gin.Context) {
 
 // SiteRegistrationHandler provides access to GET /site/registration endpoint
 func SiteRegistrationHandler(c *gin.Context) {
-	tmpl := makeTmpl("Storage")
+	tmpl := makeTmpl(c, "Storage")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	content := tmplPage("site_registration.tmpl", tmpl)
@@ -460,16 +476,21 @@ func SiteRegistrationHandler(c *gin.Context) {
 
 // LoginHandler provides access to GET /login endpoint
 func LoginHandler(c *gin.Context) {
-	tmpl := makeTmpl("Login")
+	tmpl := makeTmpl(c, "Login")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	content := tmplPage("login.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
-// UserRegistryHandler provides access to GET /registration endpoint
+// UserRegistryHandler provides access to GET /registry endpoint
 func UserRegistryHandler(c *gin.Context) {
-	tmpl := makeTmpl("User registration")
+	// check if user cookie is set, this is necessary as we do not
+	// use authorization handler for /registry end-point
+	if user, err := c.Cookie("user"); err == nil {
+		c.Set("user", user)
+	}
+	tmpl := makeTmpl(c, "User registration")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	captchaStr := captcha.New()
@@ -511,7 +532,36 @@ func DataDeleteHandler(c *gin.Context) {
 
 // LoginPostHandler provides access to POST /login endpoint
 func LoginPostHandler(c *gin.Context) {
-	c.String(400, "Not implemented yet")
+	tmpl := makeTmpl(c, "OreCast login")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+	var form LoginForm
+	var content string
+	var err error
+
+	if err = c.ShouldBind(&form); err != nil {
+		content = errorTmpl(c, "login form binding error", err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	// TODO: check user credentials in some backend
+	c.Set("user", form.User)
+	if Config.Verbose > 0 {
+		log.Printf("login from user %s, context %+v, url path %s", form.User, c.Request.URL.Path)
+	}
+
+	// set our user cookie
+	if _, err := c.Cookie("user"); err != nil {
+		c.SetCookie("user", form.User, 3600, "/", "localhost", false, true)
+	}
+
+	// redirect to main page
+	//     c.Request = c.Request.WithContext(context.WithValue(c.Request.Context(), "user", form.User))
+	// redirect
+	c.Redirect(http.StatusFound, "/")
+	//     tmpl["Content"] = fmt.Sprintf("Successfully logged as %s", form.User)
+	//     content = tmplPage("content.tmpl", tmpl)
+	//     c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
 // MetaUploadPostHandler provides access to POST /meta/upload endpoint
@@ -536,7 +586,7 @@ func DataDeletePostHandler(c *gin.Context) {
 
 // S3CreatePostHandler provides access to POST /storage/create endpoint
 func S3CreatePostHandler(c *gin.Context) {
-	tmpl := makeTmpl("Storage create bucket")
+	tmpl := makeTmpl(c, "Storage create bucket")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	var form CreateBucketForm
@@ -544,7 +594,7 @@ func S3CreatePostHandler(c *gin.Context) {
 	var err error
 
 	if err = c.ShouldBind(&form); err != nil {
-		content = errorTmpl("site bucket create binding error", err)
+		content = errorTmpl(c, "site bucket create binding error", err)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
@@ -559,7 +609,7 @@ func S3CreatePostHandler(c *gin.Context) {
 	if err != nil {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to create bucket %s at site %s, error %v", bucket, site, err)
-		content := errorTmpl(msg, err)
+		content := errorTmpl(c, msg, err)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
@@ -567,11 +617,11 @@ func S3CreatePostHandler(c *gin.Context) {
 
 	msg := fmt.Sprintf("New bucket %s at site %s successfully created, response status %s", bucket, site, resp.Status)
 	if resp.Status == "200 OK" {
-		content = successTmpl(msg)
+		content = successTmpl(c, msg)
 	} else {
 		respBody, err := io.ReadAll(resp.Body)
 		msg = fmt.Sprintf("failed response %+v", respBody)
-		content = errorTmpl(msg, err)
+		content = errorTmpl(c, msg, err)
 	}
 	tmpl["Content"] = template.HTML(content)
 	content = tmplPage("content.tmpl", tmpl)
@@ -585,7 +635,7 @@ func S3UploadPostHandler(c *gin.Context) {
 
 // S3DeletePostHandler provides access to POST /storage/delete endpoint
 func S3DeletePostHandler(c *gin.Context) {
-	tmpl := makeTmpl("Storage create bucket")
+	tmpl := makeTmpl(c, "Storage create bucket")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	var form CreateBucketForm
@@ -593,7 +643,7 @@ func S3DeletePostHandler(c *gin.Context) {
 	var err error
 
 	if err = c.ShouldBind(&form); err != nil {
-		content = errorTmpl("site bucket delete binding error", err)
+		content = errorTmpl(c, "site bucket delete binding error", err)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
@@ -608,7 +658,7 @@ func S3DeletePostHandler(c *gin.Context) {
 	if err != nil {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to delete bucket %s at site %s, error %v", bucket, site, err)
-		content := errorTmpl(msg, err)
+		content := errorTmpl(c, msg, err)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
@@ -617,18 +667,18 @@ func S3DeletePostHandler(c *gin.Context) {
 	if err != nil {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to delete bucket %s at site %s, error %v", bucket, site, err)
-		content := errorTmpl(msg, err)
+		content := errorTmpl(c, msg, err)
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	defer resp.Body.Close()
 	msg := fmt.Sprintf("Bucket %s at site %s successfully deleted, response status %s", bucket, site, resp.Status)
 	if resp.Status == "200 OK" {
-		content = successTmpl(msg)
+		content = successTmpl(c, msg)
 	} else {
 		respBody, err := io.ReadAll(resp.Body)
 		msg = fmt.Sprintf("failed response %+v", respBody)
-		content = errorTmpl(msg, err)
+		content = errorTmpl(c, msg, err)
 	}
 	tmpl["Content"] = template.HTML(content)
 	content = tmplPage("content.tmpl", tmpl)
@@ -637,23 +687,23 @@ func S3DeletePostHandler(c *gin.Context) {
 
 // UserRegistryHandler provides access to POST /registry endpoint
 func UserRegistryPostHandler(c *gin.Context) {
-	tmpl := makeTmpl("Storage")
+	tmpl := makeTmpl(c, "Storage")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 
 	// parse input form request
 	var form UserRegistrationForm
 	var err error
-	content := successTmpl("User registation is completed")
+	content := successTmpl(c, "User registation is completed")
 
 	// first check if user provides the captcha
 	if !captcha.VerifyString(form.CaptchaID, form.CaptchaSolution) {
 		msg := "Wrong captcha match, robots are not allowed"
-		content = errorTmpl(msg, err)
+		content = errorTmpl(c, msg, err)
 	}
 
 	if err = c.ShouldBind(&form); err != nil {
-		content = errorTmpl("User registration binding error", err)
+		content = errorTmpl(c, "User registration binding error", err)
 	}
 
 	// return page
@@ -664,16 +714,16 @@ func UserRegistryPostHandler(c *gin.Context) {
 
 // SiteRegistrationHandler provides access to POST /site/registration endpoint
 func SiteRegistrationPostHandler(c *gin.Context) {
-	tmpl := makeTmpl("Storage")
+	tmpl := makeTmpl(c, "Storage")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 
 	// parse input form request
 	var form Site
 	var err error
-	content := successTmpl("Site registration is successful")
+	content := successTmpl(c, "Site registration is successful")
 	if err = c.ShouldBind(&form); err != nil {
-		content = errorTmpl("Site registration binding error", err)
+		content = errorTmpl(c, "Site registration binding error", err)
 	} else {
 		if Config.Verbose > 0 {
 			log.Printf("register site %+v", form)
@@ -682,14 +732,14 @@ func SiteRegistrationPostHandler(c *gin.Context) {
 		// encrypt sensitive fields
 		form, err = encryptSiteObject(form)
 		if err != nil {
-			content = errorTmpl("Site registration failure to encrypt Site attributes", err)
+			content = errorTmpl(c, "Site registration failure to encrypt Site attributes", err)
 		} else {
 			// make JSON request to Discovery service
 			if data, err := json.Marshal(form); err == nil {
 				rurl := fmt.Sprintf("%s/sites", Config.DiscoveryURL)
 				resp, err := http.Post(rurl, "application/json", bytes.NewBuffer(data))
 				if err != nil {
-					content = errorTmpl("Site registration posting to discvoeru service failure", err)
+					content = errorTmpl(c, "Site registration posting to discvoeru service failure", err)
 					tmpl["Content"] = template.HTML(content)
 				} else {
 					if Config.Verbose > 0 {
@@ -697,7 +747,7 @@ func SiteRegistrationPostHandler(c *gin.Context) {
 					}
 				}
 			} else {
-				content = errorTmpl("Site registration json marshalling error", err)
+				content = errorTmpl(c, "Site registration json marshalling error", err)
 			}
 		}
 	}

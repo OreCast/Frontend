@@ -2,14 +2,17 @@
 
 - Ask for some data, and put it to s3, then test fetching this data and streaming.
 - Add mongodb to meatada
-- Add Google map to main page with site icon, the sites info should come from metadata which should supply geo locations
-- Add storage endpoint to create bucket and upload data.
-- Switch to restful endpoints, eg /storage/Cornell/bucket, add http delete, put, post methods to it
-- Move code from frontend storage handler to data management service. Then, storage handler will call data management apis.
-- Add stie registration form page with captcha.
-- Add user registration form page with captcha. Decide where to keep users data. I think we need yet another service for that.
-- Split site menu to submenu: registration, access, storage. The former will lead to site registration page. The second to current sites endpoint, and latter to site s3.
-- Add data menu with management, access, viewer submenus. In management page we need form to create datasets , upload files, etc
+- Add Google map to main page with site icon, the sites info should come from metadata which should supply geo locations (PARTIALLY DONE]
+  - need Google API key for that which requires credit card on file with Google
+- Add storage endpoint to create bucket and upload data [PARTIALLY DONE]
+- Switch to restful endpoints, eg /storage/Cornell/bucket, add http delete, put, post methods to it [DONE]
+- add proper cookies and session store, see
+  [document](https://stackoverflow.com/questions/66289603/use-existing-session-cookie-in-gin-router)
+- Move code from frontend storage handler to data management service. Then, storage handler will call data management api [DONE]
+- Add stie registration form page with captcha [PARTIALLY DONE]
+- Add user registration form page with captcha. Decide where to keep users data. I think we need yet another service for that [PARTIALLY DONE]
+- Split site menu to submenu: registration, access, storage. The former will lead to site registration page. The second to current sites endpoint, and latter to site s3 [PARTIALLY DONE]
+- Add data menu with management, access, viewer submenus. In management page we need form to create datasets , upload files, etc [PARTIALLY DONE]
 - Create new repo for orecast client .
 ```
 Orecast site add ...

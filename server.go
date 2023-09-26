@@ -26,10 +26,13 @@ func tmplPage(tmpl string, tmplData TmplRecord) string {
 }
 
 // helper function to make initial template struct
-func makeTmpl(title string) TmplRecord {
+func makeTmpl(c *gin.Context, title string) TmplRecord {
 	tmpl := make(TmplRecord)
 	tmpl["Title"] = title
 	tmpl["User"] = ""
+	if user, ok := c.Get("user"); ok {
+		tmpl["User"] = user
+	}
 	tmpl["Base"] = Config.Base
 	tmpl["ServerInfo"] = info()
 	tmpl["Top"] = tmplPage("top.tmpl", tmpl)
@@ -44,46 +47,60 @@ func setupRouter() *gin.Engine {
 	// gin.DisableConsoleColor()
 	r := gin.Default()
 
+	// middlewares: https://gin-gonic.com/docs/examples/using-middleware/
+	// Recovery middleware recovers from any panics and writes a 500 if there was one.
+	r.Use(gin.Recovery())
+
+	authorized := r.Group("/")
+
 	// GET end-points
 	r.GET("/docs", DocsHandler)
-	r.GET("/data", DataHandler)
-	r.GET("/data/access", DataAccessHandler)
-	r.GET("/meta", MetaDataHandler)
-	r.GET("/sites", SitesHandler)
-	r.GET("/site/access", SiteAccessHandler)
-	r.GET("/analytics", AnalyticsHandler)
-	r.GET("/discovery", DiscoveryHandler)
-	r.GET("/provenance", ProvenanceHandler)
-	r.GET("/meta/:site", MetaSiteHandler)
-	r.GET("/storage/:site", SiteBucketsHandler)
-	r.GET("/storage/:site/:bucket", BucketObjectsHandler)
-	r.GET("/storage/:site/create", S3CreateHandler)
-	r.GET("/storage/:site/upload", S3UploadHandler)
-	r.GET("/storage/:site/delete", S3DeleteHandler)
-	r.GET("/site/registration", SiteRegistrationHandler)
-	r.GET("/data/registration", DataRegistrationHandler)
 	r.GET("/login", LoginHandler)
 	r.GET("/registry", UserRegistryHandler)
-	r.GET("/meta/:site/upload", MetaUploadHandler)
-	r.GET("/meta/:site/delete", MetaDeleteHandler)
-	r.GET("/data/:site/upload", DataUploadHandler)
-	r.GET("/data/:site/delete", DataDeleteHandler)
 
 	// captcha access
 	r.GET("/captcha/:file", CaptchaHandler())
 
 	// POST end-poinst
-	r.POST("/site/registration", SiteRegistrationPostHandler)
-	r.POST("/data/registration", DataRegistrationPostHandler)
 	r.POST("/login", LoginPostHandler)
 	r.POST("/registry", UserRegistryPostHandler)
-	r.POST("/storage/create", S3CreatePostHandler)
-	r.POST("/storage/upload", S3UploadPostHandler)
-	r.POST("/storage/delete", S3DeletePostHandler)
-	r.POST("/meta/upload", MetaUploadPostHandler)
-	r.POST("/meta/delete", MetaDeletePostHandler)
-	r.POST("/data/upload", DataUploadPostHandler)
-	r.POST("/data/delete", DataDeletePostHandler)
+
+	// all other methods ahould be authorized
+	authorized.Use(AuthMiddleware())
+	{
+		// GET methods
+		authorized.GET("/data", DataHandler)
+		authorized.GET("/data/access", DataAccessHandler)
+		authorized.GET("/meta", MetaDataHandler)
+		authorized.GET("/sites", SitesHandler)
+		authorized.GET("/site/access", SiteAccessHandler)
+		authorized.GET("/analytics", AnalyticsHandler)
+		authorized.GET("/discovery", DiscoveryHandler)
+		authorized.GET("/provenance", ProvenanceHandler)
+		authorized.GET("/meta/:site", MetaSiteHandler)
+		authorized.GET("/storage/:site", SiteBucketsHandler)
+		authorized.GET("/storage/:site/:bucket", BucketObjectsHandler)
+		authorized.GET("/storage/:site/create", S3CreateHandler)
+		authorized.GET("/storage/:site/upload", S3UploadHandler)
+		authorized.GET("/storage/:site/delete", S3DeleteHandler)
+		authorized.GET("/site/registration", SiteRegistrationHandler)
+		authorized.GET("/data/registration", DataRegistrationHandler)
+		authorized.GET("/meta/:site/upload", MetaUploadHandler)
+		authorized.GET("/meta/:site/delete", MetaDeleteHandler)
+		authorized.GET("/data/:site/upload", DataUploadHandler)
+		authorized.GET("/data/:site/delete", DataDeleteHandler)
+
+		// POST methods
+		authorized.POST("/site/registration", SiteRegistrationPostHandler)
+		authorized.POST("/data/registration", DataRegistrationPostHandler)
+		authorized.POST("/storage/create", S3CreatePostHandler)
+		authorized.POST("/storage/upload", S3UploadPostHandler)
+		authorized.POST("/storage/delete", S3DeletePostHandler)
+		authorized.POST("/meta/upload", MetaUploadPostHandler)
+		authorized.POST("/meta/delete", MetaDeletePostHandler)
+		authorized.POST("/data/upload", DataUploadPostHandler)
+		authorized.POST("/data/delete", DataDeletePostHandler)
+	}
 
 	// static files
 	for _, dir := range []string{"js", "css", "images"} {

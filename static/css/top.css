@@ -18,6 +18,12 @@ header {
 .white {
   color: white;
 }
+.margin-10 {
+    margin-top: 10px;
+}
+.margin-20 {
+    margin-top: 20px;
+}
 .menu {
   padding-top: 10px;
   padding-bottom: 10px;
