@@ -55,6 +55,7 @@ func setupRouter() *gin.Engine {
 
 	// GET end-points
 	r.GET("/docs", DocsHandler)
+	r.GET("/docs/:page", DocsHandler)
 	r.GET("/login", LoginHandler)
 	r.GET("/registry", UserRegistryHandler)
 

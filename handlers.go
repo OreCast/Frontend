@@ -94,6 +94,11 @@ type MetaSiteParams struct {
 	Site string `uri:"site" binding:"required"`
 }
 
+// DocsParams represents URI storage params in /docs/:page end-point
+type DocsParams struct {
+	Page string `uri:"page" binding:"required"`
+}
+
 //
 // helper functions
 //
@@ -153,6 +158,10 @@ func DocsHandler(c *gin.Context) {
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	tmpl["Title"] = "OreCast documentation"
 	fname := "static/markdown/main.md"
+	var params DocsParams
+	if err := c.ShouldBindUri(&params); err == nil {
+		fname = fmt.Sprintf("static/markdown/%s", params.Page)
+	}
 	content, err := mdToHTML(fname)
 	if err != nil {
 		content = fmt.Sprintf("unable to convert %s to HTML, error %v", fname, err)
