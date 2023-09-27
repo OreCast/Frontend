@@ -1,4 +1,7 @@
-# OreCast implementation
+# ORECAST IMPLEMENTATION 
+
+---
+
 
 ### Details of implementation
 The recipe below provides information about 3 main services:
@@ -64,6 +67,9 @@ In log area you'll have correspoding log and pid files for your inspection.
 
 Once all services have started we may perform individual tests:
 
+---
+
+
 ### Setup s3 storage at a site.
 We can setup s3 storage on a specific site by running on it [minio](https://min.io) server, e.g.
 ```
@@ -88,6 +94,9 @@ dd15043547b9d422d5859e853a33f71921b9257b2ca181183c6aa99411390a38
 test
 ```
 
+---
+
+
 ### Register new site in Data Discovery service
 To register new site in Data Discovery service we should perform
 the following set of actions:
@@ -108,6 +117,9 @@ curl -s http://localhost:8320/sites
 At this point we have one registered site `cornell` in our discovery
 service. This demonstrates how client will interact with Data Discovery
 service.
+
+---
+
 
 ### Handling MetaData information
 Now, when we have sites some sites available we can inject
@@ -140,6 +152,9 @@ curl -s http://localhost:8300/meta | jq
 ]
 ```
 
+---
+
+
 ### OreCast frontend
 So far we described how various clients can interact with OreCast
 services. Assuming that this information will be injected at some
@@ -149,6 +164,9 @@ service.
 For that let's visit our frontend URL: `http://localhost:9000` and visit
 `Sites` page. It will show Sites with corresponding MetaData, and provide
 details of specific site and show its data (storage info).
+
+---
+
 
 ### Port allocation
 So far we follow these rules, all OreCast services should utilize 83xx ports,

@@ -1,7 +1,6 @@
 ![Architecture](images/OreCastInfrastructure.png)
 
 ### OreCast architecture
-- [Implementation](static/markdown/implementation.md)
-- [TODO tasks](static/markdown/TODO.md)
-- [References](static/markdown/references.md)
-
+- [Implementation](docs/implementation.md)
+- [TODO tasks](docs/TODO.md)
+- [References](docs/references.md)
