@@ -44,7 +44,8 @@ func mdToHTML(fname string) (string, error) {
 	doc := p.Parse(md)
 
 	// create HTML renderer with extensions
-	htmlFlags := mhtml.CommonFlags | mhtml.HrefTargetBlank
+	//     htmlFlags := mhtml.CommonFlags | mhtml.HrefTargetBlank
+	htmlFlags := mhtml.CommonFlags
 	opts := mhtml.RendererOptions{Flags: htmlFlags}
 	renderer := mhtml.NewRenderer(opts)
 	content := markdown.Render(doc, renderer)
