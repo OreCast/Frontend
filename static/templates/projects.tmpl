@@ -3,30 +3,35 @@
 
         <div class="min-height">
 
-        <nav class="nav nav-pills">
+        <nav class="nav nav-switcher">
             <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="/project" class="nav-link">
+                        Projects Home
+                    </a>
+                </li>
                 <li class="nav-item active">
                     <a href="/project/registration" class="nav-link">
                         New project
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="/project/data" class="nav-link">
                         Data
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="/project/models" class="nav-link">
                         Models
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="/project/analysis" class="nav-link">
                         Analysis
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="/project/reports" class="nav-link">
                         Reports
                     </a>
                 </li>
@@ -34,36 +39,11 @@
         </nav>
 
         <hr/>
+        <h1 class="text-mega">
+            {{.Title}}
+        </h1>
 
-        <div class="grid round">
-            <div class="column column-1">
-                <img src="https://cdn.onlinewebfonts.com/svg/img_356894.png" alt="Mineville" style="width:50px;"></a>
-            </div>
-            <div class="column column-11">
-                <h1 class="text-mega">Mineville Trailing</h1>
-                Some description
-            </div>
-        </div>
-
-        <div class="grid round">
-            <div class="column column-1">
-                <img src="https://cdn.onlinewebfonts.com/svg/img_473877.png" alt="Acid Mine" style="width:50px;"></a>
-            </div>
-            <div class="column column-11">
-                <h1 class="text-mega">Acid Mine Drainage</h1>
-                Some description
-            </div>
-        </div>
-
-        <div class="grid round">
-            <div class="column column-1">
-                <img src="https://cdn.onlinewebfonts.com/svg/img_107796.png" alt="Barton Hill" style="width:50px;"></a>
-            </div>
-            <div class="column column-11">
-                <h1 class="text-mega">Barton Hill Concrete Analysis</h1>
-                Some description
-            </div>
-        </div>
+        {{.Content}}
 
         </div> <!-- end of min-height div -->
     </article>

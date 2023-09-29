@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/dchest/captcha"
 	"github.com/gin-gonic/gin"
@@ -466,11 +467,26 @@ func S3DeleteHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
-// ProjectHandler provides access to GET /project endpoint
+// ProjectHandler provides access to GET /project or /project/:page endpoints
 func ProjectHandler(c *gin.Context) {
 	tmpl := makeTmpl(c, "OreCast projects")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
+
+	page := "page"
+	var params DocsParams
+	if err := c.ShouldBindUri(&params); err == nil {
+		page = params.Page
+	}
+	tname := fmt.Sprintf("project_%s.tmpl", page)
+	upage := strings.ToUpper(page[:1]) + page[1:]
+	tmpl["Title"] = fmt.Sprintf("%s summary page", upage)
+	if page == "page" {
+		tmpl["Title"] = "" // no need in title
+	} else if page == "registration" {
+		tmpl["Title"] = fmt.Sprintf("%s page", upage)
+	}
+	tmpl["Content"] = template.HTML(tmplPage(tname, tmpl))
 	content := tmplPage("projects.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
@@ -496,15 +512,6 @@ func SiteRegistrationHandler(c *gin.Context) {
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	content := tmplPage("site_registration.tmpl", tmpl)
-	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
-}
-
-// ProjectRegistrationHandler provides access to GET /project/registration endpoint
-func ProjectRegistrationHandler(c *gin.Context) {
-	tmpl := makeTmpl(c, "Project registration")
-	top := tmplPage("top.tmpl", tmpl)
-	bottom := tmplPage("bottom.tmpl", tmpl)
-	content := tmplPage("project_registration.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 

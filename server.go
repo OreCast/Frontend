@@ -91,7 +91,7 @@ func setupRouter() *gin.Engine {
 		authorized.GET("/data/:site/upload", DataUploadHandler)
 		authorized.GET("/data/:site/delete", DataDeleteHandler)
 		authorized.GET("/project", ProjectHandler)
-		authorized.GET("/project/registration", ProjectRegistrationHandler)
+		authorized.GET("/project/:page", ProjectHandler)
 
 		// POST methods
 		authorized.POST("/project/registration", ProjectRegistrationPostHandler)
