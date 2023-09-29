@@ -143,13 +143,20 @@ func CaptchaHandler() gin.HandlerFunc {
 func IndexHandler(c *gin.Context) {
 	// check if user cookie is set, this is necessary as we do not
 	// use authorization handler for / end-point
-	if user, err := c.Cookie("user"); err == nil {
+	user, err := c.Cookie("user")
+	if err == nil {
 		c.Set("user", user)
 	}
 	// top and bottom HTTP content from our templates
 	tmpl := makeTmpl(c, "OreCast home")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
+	tmpl["LogoClass"] = "show"
+	tmpl["MapClass"] = "hide"
+	if user != "" {
+		tmpl["LogoClass"] = "hide"
+		tmpl["MapClass"] = "show"
+	}
 	content := tmplPage("index.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
@@ -522,6 +529,12 @@ func LoginHandler(c *gin.Context) {
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	content := tmplPage("login.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+}
+
+// LogoutHandler provides access to GET /logout endpoint
+func LogoutHandler(c *gin.Context) {
+	c.SetCookie("user", "", -1, "/", "localhost", false, true)
+	c.Redirect(http.StatusFound, "/")
 }
 
 // UserRegistryHandler provides access to GET /registry endpoint

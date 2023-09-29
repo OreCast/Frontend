@@ -57,6 +57,7 @@ func setupRouter() *gin.Engine {
 	r.GET("/docs", DocsHandler)
 	r.GET("/docs/:page", DocsHandler)
 	r.GET("/login", LoginHandler)
+	r.GET("/logout", LogoutHandler)
 	r.GET("/registry", UserRegistryHandler)
 
 	// captcha access
