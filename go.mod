@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/dchest/captcha v1.0.0
 	github.com/gin-gonic/gin v1.9.1
-	github.com/gomarkdown/markdown v0.0.0-20230916125811-7478c230c7cd
+	github.com/gomarkdown/markdown v0.0.0-20230922112808-5421fefb8386
 	github.com/minio/minio-go/v7 v7.0.63
 	github.com/vkuznet/cryptoutils v0.0.2
 )
