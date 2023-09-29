@@ -83,6 +83,13 @@ type LoginForm struct {
 	Password string `form:"password" binding:"required"`
 }
 
+// ProjectRegistationForm represents project registration form on web UI
+type ProjectRegistrationForm struct {
+	Project     string `form:"project"`
+	Site        string `form:"site"`
+	Description string `form:"description"`
+}
+
 // CreateBucketForm represents create bucket registration form on web UI
 type CreateBucketForm struct {
 	Site   string `form:"site"`
@@ -459,6 +466,15 @@ func S3DeleteHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
+// ProjectHandler provides access to GET /project endpoint
+func ProjectHandler(c *gin.Context) {
+	tmpl := makeTmpl(c, "OreCast projects")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+	content := tmplPage("projects.tmpl", tmpl)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+}
+
 // DataHandler provides access to GET /data endpoint
 func DataHandler(c *gin.Context) {
 	c.String(400, "Not implemented yet")
@@ -476,10 +492,19 @@ func SiteAccessHandler(c *gin.Context) {
 
 // SiteRegistrationHandler provides access to GET /site/registration endpoint
 func SiteRegistrationHandler(c *gin.Context) {
-	tmpl := makeTmpl(c, "Storage")
+	tmpl := makeTmpl(c, "Site registration")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	content := tmplPage("site_registration.tmpl", tmpl)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+}
+
+// ProjectRegistrationHandler provides access to GET /project/registration endpoint
+func ProjectRegistrationHandler(c *gin.Context) {
+	tmpl := makeTmpl(c, "Project registration")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+	content := tmplPage("project_registration.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
@@ -564,13 +589,32 @@ func LoginPostHandler(c *gin.Context) {
 		c.SetCookie("user", form.User, 3600, "/", "localhost", false, true)
 	}
 
-	// redirect to main page
-	//     c.Request = c.Request.WithContext(context.WithValue(c.Request.Context(), "user", form.User))
 	// redirect
 	c.Redirect(http.StatusFound, "/")
-	//     tmpl["Content"] = fmt.Sprintf("Successfully logged as %s", form.User)
-	//     content = tmplPage("content.tmpl", tmpl)
-	//     c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+}
+
+// ProjectRegistrationPostHandler provides access to Post /project/registration endpoint
+func ProjectRegistrationPostHandler(c *gin.Context) {
+	tmpl := makeTmpl(c, "Project registration")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+
+	// parse input form request
+	var form ProjectRegistrationForm
+	var err error
+	content := successTmpl(c, "Project registration is successful")
+	if err = c.ShouldBind(&form); err != nil {
+		content = errorTmpl(c, "Project registration binding error", err)
+	} else {
+		if Config.Verbose > 0 {
+			log.Printf("register Project %+v", form)
+		}
+	}
+
+	// return page
+	tmpl["Content"] = template.HTML(content)
+	content = tmplPage("content.tmpl", tmpl)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
 // MetaUploadPostHandler provides access to POST /meta/upload endpoint
@@ -721,9 +765,9 @@ func UserRegistryPostHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
-// SiteRegistrationHandler provides access to POST /site/registration endpoint
+// SiteRegistrationPostHandler provides access to POST /site/registration endpoint
 func SiteRegistrationPostHandler(c *gin.Context) {
-	tmpl := makeTmpl(c, "Storage")
+	tmpl := makeTmpl(c, "Site registration")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 

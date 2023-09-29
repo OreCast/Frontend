@@ -134,3 +134,18 @@ footer {
     height: 600px; /* The height is 400 pixels */
     width: 100%; /* The width is the width of the web page */
 }
+
+/*
+ * overwrite superkube
+ */
+.sidebar {
+    background-color: #EBEBEB;
+}
+.button-orecast {
+    --button-background-color: #197B7E;
+}
+.round {
+    padding: 10px;
+    border: 1px dashed grey;
+    border-radius: 5px;
+}

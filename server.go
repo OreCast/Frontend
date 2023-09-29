@@ -90,8 +90,11 @@ func setupRouter() *gin.Engine {
 		authorized.GET("/meta/:site/delete", MetaDeleteHandler)
 		authorized.GET("/data/:site/upload", DataUploadHandler)
 		authorized.GET("/data/:site/delete", DataDeleteHandler)
+		authorized.GET("/project", ProjectHandler)
+		authorized.GET("/project/registration", ProjectRegistrationHandler)
 
 		// POST methods
+		authorized.POST("/project/registration", ProjectRegistrationPostHandler)
 		authorized.POST("/site/registration", SiteRegistrationPostHandler)
 		authorized.POST("/data/registration", DataRegistrationPostHandler)
 		authorized.POST("/storage/create", S3CreatePostHandler)
