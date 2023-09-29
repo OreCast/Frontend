@@ -38,7 +38,9 @@
                 &nbsp; | &nbsp;
                 <a href="{{.Base}}/registry" class="button button-light button-small">Registry</a>
             {{else}}
-                <h1 class="white margin-10">User:{{.User}}</h1>
+                <span class="white margin-10">{{.User}}</span>
+                &nbsp; | &nbsp;
+                <a href="{{.Base}}/logout" class="button button-light button-small">Logout</a>
             {{end}}
         </div>
     </div>
