@@ -3,6 +3,9 @@
 # OreCast architecture
 The OreCast architecture is based on loosely coupled set of MicroServices:
 - the frontend service to provide web UI interface to end-users
+- the authentication service to provide authentication to end-users
+  - upon successfull authentication it issue valid token used across all other
+    services
 - the data discovery service to keep track of participated sites
 - the meta-data service to keep track of meta-data information
 - the data-management service to manage on-site data via S3 storage objects

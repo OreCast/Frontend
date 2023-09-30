@@ -1,4 +1,5 @@
 # ORECAST IMPLEMENTATION 
+![Implementation](images/OreCastImplementation.png)
 
 ---
 
@@ -179,4 +180,5 @@ e.g.
 - 8330 s3 service
 - 8340 data-management service
 - 8350 analytics service
+- 8380 auth service
 
