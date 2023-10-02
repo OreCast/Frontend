@@ -15,7 +15,6 @@ import (
 	authz "github.com/OreCast/Authz/auth"
 	"github.com/dchest/captcha"
 	"github.com/gin-gonic/gin"
-	jwt "github.com/golang-jwt/jwt/v4"
 )
 
 // Documentation about gib handlers can be found over here:
@@ -137,43 +136,6 @@ func successTmpl(c *gin.Context, msg string) string {
 	tmpl["Content"] = template.HTML(fmt.Sprintf("<h3>SUCCESS</h3><div>%s</div>", msg))
 	content := tmplPage("success.tmpl", tmpl)
 	return content
-}
-
-func getToken() (authz.Token, error) {
-	var token authz.Token
-	rurl := fmt.Sprintf("%s/oauth/token?client_id=%s&client_secret=%s&grant_type=client_credentials&scope=read", Config.AuthzURL, Config.AuthzClientId, Config.AuthzClientSecret)
-	resp, err := http.Get(rurl)
-	defer resp.Body.Close()
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return token, err
-	}
-	err = json.Unmarshal(data, &token)
-	if err != nil {
-		return token, err
-	}
-	reqToken := token.AccessToken
-	if Config.Verbose > 0 {
-		log.Printf("INFO: obtain token %+v", token)
-	}
-
-	// validate our token
-	var jwtKey = []byte(Config.AuthzClientId)
-	claims := &authz.Claims{}
-	tkn, err := jwt.ParseWithClaims(reqToken, claims, func(token *jwt.Token) (any, error) {
-		return jwtKey, nil
-	})
-	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			return token, errors.New("invalid token signature")
-		}
-		return token, err
-	}
-	if !tkn.Valid {
-		log.Println("WARNING: token invalid")
-		return token, errors.New("invalid token validity")
-	}
-	return token, nil
 }
 
 //
@@ -364,7 +326,7 @@ func SiteBucketsHandler(c *gin.Context) {
 	if Config.Verbose > 0 {
 		log.Println("query DataManagement", rurl)
 	}
-	resp, err := http.Get(rurl)
+	resp, err := httpGet(rurl)
 	if err != nil {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to obtain storage info, error %v", err)
@@ -422,7 +384,7 @@ func BucketObjectsHandler(c *gin.Context) {
 	if Config.Verbose > 0 {
 		log.Println("query DataManagement", rurl)
 	}
-	resp, err := http.Get(rurl)
+	resp, err := httpGet(rurl)
 	if err != nil {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to obtain storage info, error %v", err)
@@ -764,7 +726,7 @@ func S3CreatePostHandler(c *gin.Context) {
 	if Config.Verbose > 0 {
 		log.Println("query DataManagement", rurl)
 	}
-	resp, err := http.PostForm(rurl, url.Values{})
+	resp, err := httpPostForm(rurl, url.Values{})
 	if err != nil {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to create bucket %s at site %s, error %v", bucket, site, err)
@@ -844,7 +806,7 @@ func S3DeletePostHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
-// UserRegistryHandler provides access to POST /registry endpoint
+// UserRegistryPostHandler provides access to POST /registry endpoint
 func UserRegistryPostHandler(c *gin.Context) {
 	tmpl := makeTmpl(c, "User registration")
 	top := tmplPage("top.tmpl", tmpl)
@@ -949,7 +911,7 @@ func SiteRegistrationPostHandler(c *gin.Context) {
 			// make JSON request to Discovery service
 			if data, err := json.Marshal(form); err == nil {
 				rurl := fmt.Sprintf("%s/sites", Config.DiscoveryURL)
-				resp, err := http.Post(rurl, "application/json", bytes.NewBuffer(data))
+				resp, err := httpPost(rurl, "application/json", bytes.NewBuffer(data))
 				if err != nil {
 					content = errorTmpl(c, "Site registration posting to discvoeru service failure", err)
 					tmpl["Content"] = template.HTML(content)
