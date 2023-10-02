@@ -51,11 +51,14 @@ type Configuration struct {
 	CaptchaVerifyUrl string `json:"captchaVerifyUrl"` // re-captcha verify url
 
 	// OreCast parts
-	DiscoveryPassword string `json:"discovery_secret"`   // data-discovery password
-	DiscoveryCipher   string `json:"discovery_cipher"`   // data-discovery cipher
-	DiscoveryURL      string `json:"discovery_url"`      // data-discovery URL
-	MetaDataURL       string `json:"metadata_url"`       // meta-data service URL
-	DataManagementURL string `json:"datamanagement_url"` // data-management service URL
+	DiscoveryPassword string `json:"discovery_secret"`    // data-discovery password
+	DiscoveryCipher   string `json:"discovery_cipher"`    // data-discovery cipher
+	DiscoveryURL      string `json:"discovery_url"`       // data-discovery URL
+	MetaDataURL       string `json:"metadata_url"`        // meta-data service URL
+	DataManagementURL string `json:"datamanagement_url"`  // data-management service URL
+	AuthzURL          string `json:"authz_url"`           // Authz service URL
+	AuthzClientId     string `json:"authz_client_id"`     // client id of OAuth
+	AuthzClientSecret string `json:"authz_client_secret"` // client secret of OAuth
 }
 
 // Credentials returns provider OAuth credential record
