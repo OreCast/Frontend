@@ -9,6 +9,7 @@ import (
 	"github.com/gomarkdown/markdown/parser"
 )
 
+// helper function to generate HTML from given markdown file
 func mdToHTML(fname string) (string, error) {
 	/*
 		filesFS, err := fs.Sub(StaticFs, "static/markdown")
