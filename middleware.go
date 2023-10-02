@@ -177,8 +177,20 @@ func httpPostForm(rurl string, formData url.Values) (*http.Response, error) {
 	return resp, err
 }
 
-// helper function to encrypt user attributes
+// helper function to encrypt user registration form attributes
 func encryptUserObject(form UserRegistrationForm) (UserRegistrationForm, error) {
+	encryptedObject, err := cryptoutils.HexEncrypt(
+		form.Password, Config.DiscoveryPassword, Config.DiscoveryCipher)
+	if err != nil {
+		return form, err
+	} else {
+		form.Password = encryptedObject
+	}
+	return form, nil
+}
+
+// helper function to encrypt login form attributes
+func encryptLoginObject(form LoginForm) (LoginForm, error) {
 	encryptedObject, err := cryptoutils.HexEncrypt(
 		form.Password, Config.DiscoveryPassword, Config.DiscoveryCipher)
 	if err != nil {
