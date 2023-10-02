@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -11,8 +12,10 @@ import (
 	"net/url"
 	"strings"
 
+	authz "github.com/OreCast/Authz/auth"
 	"github.com/dchest/captcha"
 	"github.com/gin-gonic/gin"
+	jwt "github.com/golang-jwt/jwt/v4"
 )
 
 // Documentation about gib handlers can be found over here:
@@ -72,16 +75,25 @@ type BucketData struct {
 
 // UserRegistationForm represents site registration form on web UI
 type UserRegistrationForm struct {
-	Name            string `form:"user"`
-	Password        string `form:"password"`
-	CaptchaID       string `form:"captchaId"`
-	CaptchaSolution string `form:"captchaSolution"`
+	Login           string `form:"login" json:"login"`
+	Password        string `form:"password" json:"password"`
+	FirstName       string `form:"first_name" json:"first_name"`
+	LastName        string `form:"last_name" json:"last_name"`
+	Email           string `form:"email" json:"email"`
+	CaptchaID       string `form:"captchaId" json:",omitempty"`
+	CaptchaSolution string `form:"captchaSolution" json:",omitempty"`
 }
 
 // LoginForm represents login form
 type LoginForm struct {
 	User     string `form:"user" binding:"required"`
 	Password string `form:"password" binding:"required"`
+}
+
+// User represents structure used by users DB in Authz service to handle incoming requests
+type User struct {
+	Login    string
+	Password string
 }
 
 // ProjectRegistationForm represents project registration form on web UI
@@ -125,6 +137,43 @@ func successTmpl(c *gin.Context, msg string) string {
 	tmpl["Content"] = template.HTML(fmt.Sprintf("<h3>SUCCESS</h3><div>%s</div>", msg))
 	content := tmplPage("success.tmpl", tmpl)
 	return content
+}
+
+func getToken() (authz.Token, error) {
+	var token authz.Token
+	rurl := fmt.Sprintf("%s/oauth/token?client_id=%s&client_secret=%s&grant_type=client_credentials&scope=read", Config.AuthzURL, Config.AuthzClientId, Config.AuthzClientSecret)
+	resp, err := http.Get(rurl)
+	defer resp.Body.Close()
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return token, err
+	}
+	err = json.Unmarshal(data, &token)
+	if err != nil {
+		return token, err
+	}
+	reqToken := token.AccessToken
+	if Config.Verbose > 0 {
+		log.Printf("INFO: obtain token %+v", token)
+	}
+
+	// validate our token
+	var jwtKey = []byte(Config.AuthzClientId)
+	claims := &authz.Claims{}
+	tkn, err := jwt.ParseWithClaims(reqToken, claims, func(token *jwt.Token) (any, error) {
+		return jwtKey, nil
+	})
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			return token, errors.New("invalid token signature")
+		}
+		return token, err
+	}
+	if !tkn.Valid {
+		log.Println("WARNING: token invalid")
+		return token, errors.New("invalid token validity")
+	}
+	return token, nil
 }
 
 //
@@ -238,7 +287,7 @@ func MetaSiteHandler(c *gin.Context) {
 	if err := c.ShouldBindUri(&params); err != nil {
 		msg := fmt.Sprintf("fail to bind meta/:site parameters, error %v", err)
 		content := errorTmpl(c, msg, err)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 
@@ -305,7 +354,7 @@ func SiteBucketsHandler(c *gin.Context) {
 	if err != nil {
 		msg := fmt.Sprintf("fail to bind storage parameters, error %v", err)
 		content := errorTmpl(c, msg, err)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	site := params.Site
@@ -320,7 +369,7 @@ func SiteBucketsHandler(c *gin.Context) {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to obtain storage info, error %v", err)
 		content := errorTmpl(c, msg, err)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	defer resp.Body.Close()
@@ -330,13 +379,13 @@ func SiteBucketsHandler(c *gin.Context) {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to obtain storage info, error %v", err)
 		content := errorTmpl(c, msg, err)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	if bdata.Status != "ok" {
 		msg := fmt.Sprintf("fail to obtain storage info, error %v", bdata.Error)
 		content := errorTmpl(c, msg, nil)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	tmpl["StoragePath"] = fmt.Sprintf("/storage/%s", site)
@@ -359,7 +408,7 @@ func BucketObjectsHandler(c *gin.Context) {
 	if err != nil {
 		msg := fmt.Sprintf("fail to bind storage parameters, error %v", err)
 		content := errorTmpl(c, msg, err)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	site := params.Site
@@ -378,7 +427,7 @@ func BucketObjectsHandler(c *gin.Context) {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to obtain storage info, error %v", err)
 		content := errorTmpl(c, msg, err)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	defer resp.Body.Close()
@@ -388,13 +437,13 @@ func BucketObjectsHandler(c *gin.Context) {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to obtain storage info, error %v", err)
 		content := errorTmpl(c, msg, err)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	if bdata.Status != "ok" {
 		msg := fmt.Sprintf("fail to obtain storage info, error %v", bdata.Error)
 		content := errorTmpl(c, msg, nil)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	// convert storage buckets data into appropriate HTML structure
@@ -449,13 +498,15 @@ func S3UploadHandler(c *gin.Context) {
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	var params StorageParams
 	var content string
+	status := http.StatusOK
 	if err := c.ShouldBindUri(&params); err == nil {
 		tmpl["Site"] = params.Site
 		content = tmplPage("upload_data.tmpl", tmpl)
 	} else {
 		content = errorTmpl(c, "binding error", err)
+		status = http.StatusBadRequest
 	}
-	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+	c.Data(status, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
 // S3DeleteHandler provides access to GET /storage/delete endpoint
@@ -465,13 +516,15 @@ func S3DeleteHandler(c *gin.Context) {
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	var params StorageParams
 	var content string
+	status := http.StatusOK
 	if err := c.ShouldBindUri(&params); err == nil {
 		tmpl["Site"] = params.Site
 		content = tmplPage("delete_bucket.tmpl", tmpl)
 	} else {
 		content = errorTmpl(c, "binding error", err)
+		status = http.StatusBadRequest
 	}
-	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+	c.Data(status, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
 // ProjectHandler provides access to GET /project or /project/:page endpoints
@@ -595,13 +648,46 @@ func LoginPostHandler(c *gin.Context) {
 
 	if err = c.ShouldBind(&form); err != nil {
 		content = errorTmpl(c, "login form binding error", err)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
-	// TODO: check user credentials in some backend
+	// make a call to Authz service to check for a user
+	rurl := fmt.Sprintf("%s/oauth/authorize?client_id=%s&response_type=code", Config.AuthzURL, Config.AuthzClientId)
+	user := User{Login: form.User, Password: form.Password}
+	data, err := json.Marshal(user)
+	if err != nil {
+		content = errorTmpl(c, "unable to marshal user form, error", err)
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	resp, err := http.Post(rurl, "application/json", bytes.NewBuffer(data))
+	if err != nil {
+		content = errorTmpl(c, "unable to POST request to Authz service, error", err)
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	defer resp.Body.Close()
+	data, err = io.ReadAll(resp.Body)
+	var response authz.Response
+	err = json.Unmarshal(data, &response)
+	if err != nil {
+		content = errorTmpl(c, "unable handle authz response, error", err)
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	if Config.Verbose > 0 {
+		log.Printf("INFO: Authz response %+v, error %v", response, err)
+	}
+	if response.Status != "ok" {
+		msg := fmt.Sprintf("No user %s found in Authz service", form.User)
+		content = errorTmpl(c, msg, errors.New("user not found"))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+
 	c.Set("user", form.User)
 	if Config.Verbose > 0 {
-		log.Printf("login from user %s, context %+v, url path %s", form.User, c.Request.URL.Path)
+		log.Printf("login from user %s, url path %s", form.User, c.Request.URL.Path)
 	}
 
 	// set our user cookie
@@ -668,7 +754,7 @@ func S3CreatePostHandler(c *gin.Context) {
 
 	if err = c.ShouldBind(&form); err != nil {
 		content = errorTmpl(c, "site bucket create binding error", err)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	site := form.Site
@@ -683,7 +769,7 @@ func S3CreatePostHandler(c *gin.Context) {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to create bucket %s at site %s, error %v", bucket, site, err)
 		content := errorTmpl(c, msg, err)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	defer resp.Body.Close()
@@ -717,7 +803,7 @@ func S3DeletePostHandler(c *gin.Context) {
 
 	if err = c.ShouldBind(&form); err != nil {
 		content = errorTmpl(c, "site bucket delete binding error", err)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	site := form.Site
@@ -732,7 +818,7 @@ func S3DeletePostHandler(c *gin.Context) {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to delete bucket %s at site %s, error %v", bucket, site, err)
 		content := errorTmpl(c, msg, err)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	client := &http.Client{}
@@ -741,7 +827,7 @@ func S3DeletePostHandler(c *gin.Context) {
 		log.Println("ERROR:", err)
 		msg := fmt.Sprintf("fail to delete bucket %s at site %s, error %v", bucket, site, err)
 		content := errorTmpl(c, msg, err)
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
 	defer resp.Body.Close()
@@ -760,7 +846,7 @@ func S3DeletePostHandler(c *gin.Context) {
 
 // UserRegistryHandler provides access to POST /registry endpoint
 func UserRegistryPostHandler(c *gin.Context) {
-	tmpl := makeTmpl(c, "Storage")
+	tmpl := makeTmpl(c, "User registration")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 
@@ -769,19 +855,72 @@ func UserRegistryPostHandler(c *gin.Context) {
 	var err error
 	content := successTmpl(c, "User registation is completed")
 
+	if err = c.ShouldBind(&form); err != nil {
+		content = errorTmpl(c, "User registration binding error", err)
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	if Config.Verbose > 0 {
+		log.Printf("new user %+v", form)
+	}
+
 	// first check if user provides the captcha
 	if !captcha.VerifyString(form.CaptchaID, form.CaptchaSolution) {
 		msg := "Wrong captcha match, robots are not allowed"
 		content = errorTmpl(c, msg, err)
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
 	}
 
-	if err = c.ShouldBind(&form); err != nil {
-		content = errorTmpl(c, "User registration binding error", err)
+	// make a call to Authz service to registry new user
+	rurl := fmt.Sprintf("%s/user", Config.AuthzURL)
+	data, err := json.Marshal(form)
+	if err != nil {
+		content = errorTmpl(c, "unable to marshal user form, error", err)
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	resp, err := http.Post(rurl, "application/json", bytes.NewBuffer(data))
+	if err != nil {
+		content = errorTmpl(c, "unable to POST request to Authz service, error", err)
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	defer resp.Body.Close()
+	data, err = io.ReadAll(resp.Body)
+	var response authz.Response
+	err = json.Unmarshal(data, &response)
+	if err != nil {
+		content = errorTmpl(c, "unable handle authz response, error", err)
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	if Config.Verbose > 0 {
+		log.Printf("INFO: Authz response %+v, error %v", response, err)
+	}
+	if response.Status != "ok" {
+		msg := fmt.Sprintf("No user %s found in Authz service", form.Login)
+		content = errorTmpl(c, msg, errors.New("user not found"))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+
+	c.Set("user", form.Login)
+	if Config.Verbose > 0 {
+		log.Printf("login from user %s, url path %s", form.Login, c.Request.URL.Path)
+	}
+
+	// set our user cookie
+	if _, err := c.Cookie("user"); err != nil {
+		c.SetCookie("user", form.Login, 3600, "/", "localhost", false, true)
 	}
 
 	// return page
+	// we regenerate top template with new user info
+	top = tmplPage("top.tmpl", tmpl)
+	// create page content
 	tmpl["Content"] = template.HTML(content)
-	content = tmplPage("user_registration.tmpl", tmpl)
+	content = tmplPage("success.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
