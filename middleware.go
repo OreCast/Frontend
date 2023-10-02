@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strings"
 
@@ -121,7 +122,15 @@ func httpGet(rurl string) (*http.Response, error) {
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", _token.AccessToken))
 	client := &http.Client{}
+	if Config.Verbose > 1 {
+		dump, err := httputil.DumpRequestOut(req, true)
+		log.Println("request", string(dump), err)
+	}
 	resp, err := client.Do(req)
+	if Config.Verbose > 1 {
+		dump, err := httputil.DumpResponse(resp, true)
+		log.Println("response", string(dump), err)
+	}
 	return resp, err
 }
 
@@ -135,7 +144,15 @@ func httpPost(rurl, contentType string, buffer *bytes.Buffer) (*http.Response, e
 	req.Header.Add("Content-Type", contentType)
 	req.Header.Add("Accept", contentType)
 	client := &http.Client{}
+	if Config.Verbose > 1 {
+		dump, err := httputil.DumpRequestOut(req, true)
+		log.Println("request", string(dump), err)
+	}
 	resp, err := client.Do(req)
+	if Config.Verbose > 1 {
+		dump, err := httputil.DumpResponse(resp, true)
+		log.Println("response", string(dump), err)
+	}
 	return resp, err
 }
 
@@ -148,7 +165,15 @@ func httpPostForm(rurl string, formData url.Values) (*http.Response, error) {
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", _token.AccessToken))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	client := &http.Client{}
+	if Config.Verbose > 1 {
+		dump, err := httputil.DumpRequestOut(req, true)
+		log.Println("request", string(dump), err)
+	}
 	resp, err := client.Do(req)
+	if Config.Verbose > 1 {
+		dump, err := httputil.DumpResponse(resp, true)
+		log.Println("response", string(dump), err)
+	}
 	return resp, err
 }
 
