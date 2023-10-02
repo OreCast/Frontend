@@ -58,14 +58,14 @@ func setupRouter() *gin.Engine {
 	r.GET("/docs/:page", DocsHandler)
 	r.GET("/login", LoginHandler)
 	r.GET("/logout", LogoutHandler)
-	r.GET("/registry", UserRegistryHandler)
+	r.GET("/user/registration", UserRegistryHandler)
 
 	// captcha access
 	r.GET("/captcha/:file", CaptchaHandler())
 
 	// POST end-poinst
 	r.POST("/login", LoginPostHandler)
-	r.POST("/registry", UserRegistryPostHandler)
+	r.POST("/user/registration", UserRegistryPostHandler)
 
 	// all other methods ahould be authorized
 	authorized.Use(AuthMiddleware())
