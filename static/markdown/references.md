@@ -35,3 +35,4 @@ Here we provide a useful list of resources used in OreCast development:
 - [casdoor Go Auth framework](https://github.com/casdoor/casdoor)
 - [Go Auth](https://www.jetbrains.com/go/guide/tutorials/authentication-for-go-apps/auth/)
 - [Go OAuth2](https://github.com/go-oauth2/oauth2)
+- [Go security, JWT, auth, middleware and crypto](https://www.squash.io/golang-security-jwt-authentication-middleware-and-crypto-packages-in-gin/)
