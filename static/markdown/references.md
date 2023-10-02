@@ -34,3 +34,4 @@ Here we provide a useful list of resources used in OreCast development:
 - [OAuth 2.0 vs OpenID Connect vs SAML](https://www.okta.com/identity-101/whats-the-difference-between-oauth-openid-connect-and-saml/)
 - [casdoor Go Auth framework](https://github.com/casdoor/casdoor)
 - [Go Auth](https://www.jetbrains.com/go/guide/tutorials/authentication-for-go-apps/auth/)
+- [Go OAuth2](https://github.com/go-oauth2/oauth2)
