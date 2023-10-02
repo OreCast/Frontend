@@ -4,8 +4,12 @@ import (
 	"log"
 	"net/http"
 
+	authz "github.com/OreCast/Authz/auth"
 	"github.com/gin-gonic/gin"
 )
+
+// _token is used across all authorized APIs
+var _token *authz.Token
 
 // gin cookies
 // https://gin-gonic.com/docs/examples/cookie/
@@ -19,6 +23,11 @@ func AuthMiddleware() gin.HandlerFunc {
 				log.Println(c.Request.Method, c.Request.URL.Path, user)
 			}
 			c.Set("user", user)
+			if err := refreshToken(); err != nil {
+				content := errorTmpl(c, "unable to get valid token", err)
+				c.Data(http.StatusUnauthorized, "text/html; charset=utf-8", []byte(content))
+				return
+			}
 			return
 		}
 
@@ -32,6 +41,26 @@ func AuthMiddleware() gin.HandlerFunc {
 				log.Println(c.Request.Method, c.Request.URL.Path, user)
 			}
 		}
+		if err := refreshToken(); err != nil {
+			content := errorTmpl(c, "unable to get valid token", err)
+			c.Data(http.StatusUnauthorized, "text/html; charset=utf-8", []byte(content))
+			return
+		}
 		c.Next()
 	}
+}
+
+func refreshToken() error {
+	// check and obtain token
+	var err error
+	if _token == nil {
+		if token, err := getToken(); err == nil {
+			_token = &token
+		} else {
+			return err
+		}
+	} else {
+		err = _token.Validate(Config.AuthzClientId)
+	}
+	return err
 }
