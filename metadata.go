@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 )
 
 // helper function to get metadata
@@ -27,7 +26,7 @@ type MetaDataRecord struct {
 func metadata(site string) MetaDataRecord {
 	var results MetaDataRecord
 	rurl := fmt.Sprintf("%s/meta/%s", Config.MetaDataURL, site)
-	resp, err := http.Get(rurl)
+	resp, err := httpGet(rurl)
 	if Config.Verbose > 0 {
 		log.Println("query MetaData service rurl", rurl, err)
 	}

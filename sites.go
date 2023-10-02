@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 
 	cryptoutils "github.com/vkuznet/cryptoutils"
 )
@@ -25,7 +24,7 @@ type Site struct {
 func sites() []Site {
 	var out []Site
 	rurl := fmt.Sprintf("%s/sites", Config.DiscoveryURL)
-	resp, err := http.Get(rurl)
+	resp, err := httpGet(rurl)
 	if err != nil {
 		log.Println("ERROR:", err)
 		return out
@@ -61,7 +60,7 @@ func site(site, bucket string) SiteObject {
 	if Config.Verbose > 0 {
 		log.Println("query", surl)
 	}
-	resp, err := http.Get(surl)
+	resp, err := httpGet(surl)
 	var siteObj SiteObject
 	if err != nil {
 		log.Printf("ERROR: unable to contact DataDiscovery service %s, error %v", surl, err)
