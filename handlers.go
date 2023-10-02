@@ -613,6 +613,15 @@ func LoginPostHandler(c *gin.Context) {
 		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
+
+	// encrypt provided user password before sending to Authz server
+	form, err = encryptLoginObject(form)
+	if err != nil {
+		content = errorTmpl(c, "unable to encrypt user password", err)
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+
 	// make a call to Authz service to check for a user
 	rurl := fmt.Sprintf("%s/oauth/authorize?client_id=%s&response_type=code", Config.AuthzURL, Config.AuthzClientId)
 	user := User{Login: form.User, Password: form.Password}
@@ -834,6 +843,14 @@ func UserRegistryPostHandler(c *gin.Context) {
 		return
 	}
 
+	// encrypt form password
+	form, err = encryptUserObject(form)
+	if err != nil {
+		content = errorTmpl(c, "unable to encrypt user password", err)
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+
 	// make a call to Authz service to registry new user
 	rurl := fmt.Sprintf("%s/user", Config.AuthzURL)
 	data, err := json.Marshal(form)
@@ -875,6 +892,7 @@ func UserRegistryPostHandler(c *gin.Context) {
 	// set our user cookie
 	if _, err := c.Cookie("user"); err != nil {
 		c.SetCookie("user", form.Login, 3600, "/", "localhost", false, true)
+		c.Set("user", form.Login)
 	}
 
 	// return page
