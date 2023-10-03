@@ -2,6 +2,11 @@
 
 - Ask for some data, and put it to s3, then test fetching this data and streaming.
 - Add mongodb to meatada
+- Move common data structs from services to common/data
+  - for instance, the client and Frontend re-use Site/MetaData structs
+  and therefore we need to put them into common place
+- move common functions to common/utils or common/tools, e.g.
+  - httpGet, httpPost
 - Add Google map to main page with site icon, the sites info should come from metadata which should supply geo locations (PARTIALLY DONE]
   - need Google API key for that which requires credit card on file with Google
 - Add storage endpoint to create bucket and upload data [PARTIALLY DONE]

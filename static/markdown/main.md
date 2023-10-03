@@ -11,6 +11,8 @@ The OreCast architecture is based on loosely coupled set of MicroServices:
 - the data-management service to manage on-site data via S3 storage objects
 - the data-bookkeeping service to keep provenance information about dataset
   processing
+- the authentication and authorization service
+- the command line client
 All of them are glued together by HTTP protocol and represent whole
 infrustructure. For further details please refer to [implementation](docs/implementation.md)
 details.
