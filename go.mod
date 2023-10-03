@@ -3,7 +3,7 @@ module github.com/OreCast/Frontend
 go 1.21.0
 
 require (
-	github.com/OreCast/Authz/auth v0.0.0-20231002172245-1d3438afcaa7
+	github.com/OreCast/common/authz v0.0.0-20231003104242-62c0b468258a
 	github.com/dchest/captcha v1.0.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang-jwt/jwt/v4 v4.5.0

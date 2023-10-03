@@ -12,7 +12,7 @@ import (
 	"net/url"
 	"strings"
 
-	authz "github.com/OreCast/Authz/auth"
+	authz "github.com/OreCast/common/authz"
 	"github.com/gin-gonic/gin"
 	jwt "github.com/golang-jwt/jwt/v4"
 	cryptoutils "github.com/vkuznet/cryptoutils"

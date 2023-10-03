@@ -12,7 +12,7 @@ import (
 	"net/url"
 	"strings"
 
-	authz "github.com/OreCast/Authz/auth"
+	authz "github.com/OreCast/common/authz"
 	"github.com/dchest/captcha"
 	"github.com/gin-gonic/gin"
 )

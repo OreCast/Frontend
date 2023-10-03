@@ -1,5 +1,5 @@
-github.com/OreCast/Authz/auth v0.0.0-20231002172245-1d3438afcaa7 h1:hwF+IpMiBk9TQukVeOkONXP3qHvIiMQoB9+R6Me1xa4=
-github.com/OreCast/Authz/auth v0.0.0-20231002172245-1d3438afcaa7/go.mod h1:BlU+z9rr+xCfCwsyio/ppKAX8emsHJRBQhbX5k4+5b8=
+github.com/OreCast/common/authz v0.0.0-20231003104242-62c0b468258a h1:7utLcR5Ob4kSdeim6UBx4VGGh2PEouXY++JKlvSlDY8=
+github.com/OreCast/common/authz v0.0.0-20231003104242-62c0b468258a/go.mod h1:jDwwPWwkZ7e/Uzv2Xz7+3AO4uHtnrCNUq4/5hpwPTDM=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
 github.com/bytedance/sonic v1.9.1 h1:6iJ6NqdoxCDr6mbY8h18oSO+cShGSMRGCEo7F2h0x8s=
 github.com/bytedance/sonic v1.9.1/go.mod h1:i736AoUSYt75HyZLoJW9ERYxcy6eaN6h4BZXU064P/U=
