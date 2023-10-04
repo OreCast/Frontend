@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	authz "github.com/OreCast/common/authz"
+	oreConfig "github.com/OreCast/common/config"
 	"github.com/dchest/captcha"
 	"github.com/gin-gonic/gin"
 )
@@ -244,7 +245,7 @@ func MetaSiteHandler(c *gin.Context) {
 	tmpl := makeTmpl(c, "Sites")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
-	tmpl["Base"] = Config.Base
+	tmpl["Base"] = oreConfig.Config.Frontend.WebServer.Base
 	var params MetaSiteParams
 	if err := c.ShouldBindUri(&params); err != nil {
 		msg := fmt.Sprintf("fail to bind meta/:site parameters, error %v", err)
@@ -257,7 +258,7 @@ func MetaSiteHandler(c *gin.Context) {
 	var records []MetaData
 	for _, sobj := range sites() {
 		if site == sobj.Name {
-			if Config.Verbose > 0 {
+			if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 				log.Printf("processing %+v", sobj)
 			}
 			tmpl["Description"] = sobj.Description
@@ -284,11 +285,11 @@ func SitesHandler(c *gin.Context) {
 	tmpl := makeTmpl(c, "Sites")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
-	tmpl["Base"] = Config.Base
+	tmpl["Base"] = oreConfig.Config.Frontend.WebServer.Base
 	var content string
 	for _, sobj := range sites() {
 		site := sobj.Name
-		if Config.Verbose > 0 {
+		if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 			log.Printf("processing %+v", sobj)
 		}
 		rec := metadata(site)
@@ -322,8 +323,8 @@ func SiteBucketsHandler(c *gin.Context) {
 	site := params.Site
 
 	// place request to DataManagement service to get either site or bucket info
-	rurl := fmt.Sprintf("%s/storage/%s", Config.DataManagementURL, site)
-	if Config.Verbose > 0 {
+	rurl := fmt.Sprintf("%s/storage/%s", oreConfig.Config.Services.DataManagementURL, site)
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 		log.Println("query DataManagement", rurl)
 	}
 	resp, err := httpGet(rurl)
@@ -377,11 +378,11 @@ func BucketObjectsHandler(c *gin.Context) {
 	bucket := params.Bucket
 
 	// place request to DataManagement service to get either site or bucket info
-	rurl := fmt.Sprintf("%s/storage/%s", Config.DataManagementURL, site)
+	rurl := fmt.Sprintf("%s/storage/%s", oreConfig.Config.Services.DataManagementURL, site)
 	if bucket != "" {
-		rurl = fmt.Sprintf("%s/storage/%s/%s", Config.DataManagementURL, site, bucket)
+		rurl = fmt.Sprintf("%s/storage/%s/%s", oreConfig.Config.Services.DataManagementURL, site, bucket)
 	}
-	if Config.Verbose > 0 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 		log.Println("query DataManagement", rurl)
 	}
 	resp, err := httpGet(rurl)
@@ -429,7 +430,7 @@ func BucketObjectsHandler(c *gin.Context) {
 	}
 	tmpl["StoragePath"] = fmt.Sprintf("/storage/%s/%s", site, bucket)
 	tmpl["Datasets"] = datasets
-	tmpl["DataManagementURL"] = Config.DataManagementURL
+	tmpl["DataManagementURL"] = oreConfig.Config.Services.DataManagementURL
 	tmpl["NObjects"] = len(datasets)
 	tmpl["Site"] = site
 	tmpl["Bucket"] = bucket
@@ -563,11 +564,11 @@ func UserRegistryHandler(c *gin.Context) {
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	captchaStr := captcha.New()
-	if Config.Verbose > 0 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 		log.Println("new captcha", captchaStr)
 	}
 	tmpl["CaptchaId"] = captchaStr
-	tmpl["CaptchaPublicKey"] = Config.CaptchaPublicKey
+	tmpl["CaptchaPublicKey"] = oreConfig.Config.Frontend.CaptchaPublicKey
 	content := tmplPage("user_registration.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
@@ -623,7 +624,7 @@ func LoginPostHandler(c *gin.Context) {
 	}
 
 	// make a call to Authz service to check for a user
-	rurl := fmt.Sprintf("%s/oauth/authorize?client_id=%s&response_type=code", Config.AuthzURL, Config.AuthzClientId)
+	rurl := fmt.Sprintf("%s/oauth/authorize?client_id=%s&response_type=code", oreConfig.Config.Services.AuthzURL, oreConfig.Config.Authz.ClientId)
 	user := User{Login: form.User, Password: form.Password}
 	data, err := json.Marshal(user)
 	if err != nil {
@@ -646,7 +647,7 @@ func LoginPostHandler(c *gin.Context) {
 		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
-	if Config.Verbose > 0 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 		log.Printf("INFO: Authz response %+v, error %v", response, err)
 	}
 	if response.Status != "ok" {
@@ -657,7 +658,7 @@ func LoginPostHandler(c *gin.Context) {
 	}
 
 	c.Set("user", form.User)
-	if Config.Verbose > 0 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 		log.Printf("login from user %s, url path %s", form.User, c.Request.URL.Path)
 	}
 
@@ -683,7 +684,7 @@ func ProjectRegistrationPostHandler(c *gin.Context) {
 	if err = c.ShouldBind(&form); err != nil {
 		content = errorTmpl(c, "Project registration binding error", err)
 	} else {
-		if Config.Verbose > 0 {
+		if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 			log.Printf("register Project %+v", form)
 		}
 	}
@@ -731,8 +732,8 @@ func S3CreatePostHandler(c *gin.Context) {
 	site := form.Site
 	bucket := form.Bucket
 	// curl -X POST http://localhost:8340/storage/cornell/s3-bucket
-	rurl := fmt.Sprintf("%s/storage/%s/%s", Config.DataManagementURL, site, bucket)
-	if Config.Verbose > 0 {
+	rurl := fmt.Sprintf("%s/storage/%s/%s", oreConfig.Config.Services.DataManagementURL, site, bucket)
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 		log.Println("query DataManagement", rurl)
 	}
 	resp, err := httpPostForm(rurl, url.Values{})
@@ -780,8 +781,8 @@ func S3DeletePostHandler(c *gin.Context) {
 	site := form.Site
 	bucket := form.Bucket
 	// curl -X DELETE http://localhost:8340/storage/cornell/s3-bucket
-	rurl := fmt.Sprintf("%s/storage/%s/%s", Config.DataManagementURL, site, bucket)
-	if Config.Verbose > 0 {
+	rurl := fmt.Sprintf("%s/storage/%s/%s", oreConfig.Config.Services.DataManagementURL, site, bucket)
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 		log.Println("query DataManagement", rurl)
 	}
 	req, err := http.NewRequest("DELETE", rurl, nil)
@@ -831,7 +832,7 @@ func UserRegistryPostHandler(c *gin.Context) {
 		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
-	if Config.Verbose > 0 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 		log.Printf("new user %+v", form)
 	}
 
@@ -852,7 +853,7 @@ func UserRegistryPostHandler(c *gin.Context) {
 	}
 
 	// make a call to Authz service to registry new user
-	rurl := fmt.Sprintf("%s/user", Config.AuthzURL)
+	rurl := fmt.Sprintf("%s/user", oreConfig.Config.Services.AuthzURL)
 	data, err := json.Marshal(form)
 	if err != nil {
 		content = errorTmpl(c, "unable to marshal user form, error", err)
@@ -874,7 +875,7 @@ func UserRegistryPostHandler(c *gin.Context) {
 		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
 		return
 	}
-	if Config.Verbose > 0 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 		log.Printf("INFO: Authz response %+v, error %v", response, err)
 	}
 	if response.Status != "ok" {
@@ -885,7 +886,7 @@ func UserRegistryPostHandler(c *gin.Context) {
 	}
 
 	c.Set("user", form.Login)
-	if Config.Verbose > 0 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 		log.Printf("login from user %s, url path %s", form.Login, c.Request.URL.Path)
 	}
 
@@ -917,7 +918,7 @@ func SiteRegistrationPostHandler(c *gin.Context) {
 	if err = c.ShouldBind(&form); err != nil {
 		content = errorTmpl(c, "Site registration binding error", err)
 	} else {
-		if Config.Verbose > 0 {
+		if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 			log.Printf("register site %+v", form)
 		}
 
@@ -928,13 +929,13 @@ func SiteRegistrationPostHandler(c *gin.Context) {
 		} else {
 			// make JSON request to Discovery service
 			if data, err := json.Marshal(form); err == nil {
-				rurl := fmt.Sprintf("%s/sites", Config.DiscoveryURL)
+				rurl := fmt.Sprintf("%s/sites", oreConfig.Config.Services.DiscoveryURL)
 				resp, err := httpPost(rurl, "application/json", bytes.NewBuffer(data))
 				if err != nil {
 					content = errorTmpl(c, "Site registration posting to discvoeru service failure", err)
 					tmpl["Content"] = template.HTML(content)
 				} else {
-					if Config.Verbose > 0 {
+					if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 						log.Printf("discovery service response: %s", resp.Status)
 					}
 				}

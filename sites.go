@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 
+	oreConfig "github.com/OreCast/common/config"
 	cryptoutils "github.com/vkuznet/cryptoutils"
 )
 
@@ -23,7 +24,7 @@ type Site struct {
 // helper function to fetch sites info from discovery service
 func sites() []Site {
 	var out []Site
-	rurl := fmt.Sprintf("%s/sites", Config.DiscoveryURL)
+	rurl := fmt.Sprintf("%s/sites", oreConfig.Config.Services.DiscoveryURL)
 	resp, err := httpGet(rurl)
 	if err != nil {
 		log.Println("ERROR:", err)
@@ -56,8 +57,8 @@ type DiscoveryRecord struct {
 }
 
 func site(site, bucket string) SiteObject {
-	surl := fmt.Sprintf("%s/sites", Config.DiscoveryURL)
-	if Config.Verbose > 0 {
+	surl := fmt.Sprintf("%s/sites", oreConfig.Config.Services.DiscoveryURL)
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 		log.Println("query", surl)
 	}
 	resp, err := httpGet(surl)
@@ -79,7 +80,7 @@ func site(site, bucket string) SiteObject {
 		log.Printf("ERROR: unable to unmarshal DataDiscovery response, error %v", err)
 		return siteObj
 	}
-	if Config.Verbose > 0 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 		log.Printf("site records %+v", records)
 	}
 
@@ -87,14 +88,14 @@ func site(site, bucket string) SiteObject {
 		if rec.Name == site {
 			log.Printf("INFO: found %s in DataDiscovery records, will access its s3 via %s", rec.Name, rec.URL)
 			// bingo: we got desired site, now we can query its s3 storage for datasets
-			log.Println("###", rec.AccessKey, Config.DiscoveryPassword, Config.DiscoveryCipher)
-			akey, err := cryptoutils.HexDecrypt(rec.AccessKey, Config.DiscoveryPassword, Config.DiscoveryCipher)
+			log.Println("###", rec.AccessKey, oreConfig.Config.Encryption.Secret, oreConfig.Config.Encryption.Cipher)
+			akey, err := cryptoutils.HexDecrypt(rec.AccessKey, oreConfig.Config.Encryption.Secret, oreConfig.Config.Encryption.Cipher)
 			if err != nil {
 				log.Printf("ERROR: unable to decrypt data discovery access key, error %v", err)
 				return siteObj
 
 			}
-			apwd, err := cryptoutils.HexDecrypt(rec.AccessSecret, Config.DiscoveryPassword, Config.DiscoveryCipher)
+			apwd, err := cryptoutils.HexDecrypt(rec.AccessSecret, oreConfig.Config.Encryption.Secret, oreConfig.Config.Encryption.Cipher)
 			if err != nil {
 				log.Printf("ERROR: unable to decrypt data discovery acess secret, error %v", err)
 				return siteObj
@@ -106,7 +107,7 @@ func site(site, bucket string) SiteObject {
 				AccessSecret: string(apwd),
 				UseSSL:       rec.UseSSL,
 			}
-			if Config.Verbose > 0 {
+			if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 				log.Printf("### will access %+v", s3)
 			}
 			obj := SiteObject{
@@ -121,13 +122,13 @@ func site(site, bucket string) SiteObject {
 
 // helper function to encrypt site attributes
 func encryptSiteObject(site Site) (Site, error) {
-	encryptedObject, err := cryptoutils.HexEncrypt(site.AccessKey, Config.DiscoveryPassword, Config.DiscoveryCipher)
+	encryptedObject, err := cryptoutils.HexEncrypt(site.AccessKey, oreConfig.Config.Encryption.Secret, oreConfig.Config.Encryption.Cipher)
 	if err != nil {
 		return site, err
 	} else {
 		site.AccessKey = encryptedObject
 	}
-	encryptedObject, err = cryptoutils.HexEncrypt(site.AccessSecret, Config.DiscoveryPassword, Config.DiscoveryCipher)
+	encryptedObject, err = cryptoutils.HexEncrypt(site.AccessSecret, oreConfig.Config.Encryption.Secret, oreConfig.Config.Encryption.Cipher)
 	if err != nil {
 		return site, err
 	} else {

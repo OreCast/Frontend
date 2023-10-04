@@ -8,10 +8,12 @@ import (
 	"net/http"
 	"time"
 
+	oreConfig "github.com/OreCast/common/config"
 	"github.com/gin-gonic/gin"
 )
 
 // content is our static web server content.
+//
 //go:embed static
 var StaticFs embed.FS
 
@@ -33,8 +35,8 @@ func makeTmpl(c *gin.Context, title string) TmplRecord {
 	if user, ok := c.Get("user"); ok {
 		tmpl["User"] = user
 	}
-	tmpl["Base"] = Config.Base
-	tmpl["ServerInfo"] = info()
+	tmpl["Base"] = oreConfig.Config.Frontend.WebServer.Base
+	tmpl["ServerInfo"] = oreConfig.Info()
 	tmpl["Top"] = tmplPage("top.tmpl", tmpl)
 	tmpl["Bottom"] = tmplPage("bottom.tmpl", tmpl)
 	tmpl["StartTime"] = time.Now().Unix()
@@ -113,7 +115,7 @@ func setupRouter() *gin.Engine {
 		if err != nil {
 			panic(err)
 		}
-		m := fmt.Sprintf("%s/%s", Config.Base, dir)
+		m := fmt.Sprintf("%s/%s", oreConfig.Config.Frontend.WebServer.Base, dir)
 		r.StaticFS(m, http.FS(filesFS))
 	}
 
@@ -122,9 +124,9 @@ func setupRouter() *gin.Engine {
 }
 
 // Server defines our HTTP server
-func Server(configFile string) {
+func Server() {
 	r := setupRouter()
-	sport := fmt.Sprintf(":%d", Config.Port)
+	sport := fmt.Sprintf(":%d", oreConfig.Config.Frontend.WebServer.Port)
 	log.Printf("Start HTTP server %s", sport)
 	r.Run(sport)
 }

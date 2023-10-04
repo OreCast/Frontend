@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	authz "github.com/OreCast/common/authz"
+	oreConfig "github.com/OreCast/common/config"
 	"github.com/gin-gonic/gin"
 	jwt "github.com/golang-jwt/jwt/v4"
 	cryptoutils "github.com/vkuznet/cryptoutils"
@@ -29,7 +30,7 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// check if our user key is set
 		if user, err := c.Cookie("user"); err == nil {
-			if Config.Verbose > 0 {
+			if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 				log.Println(c.Request.Method, c.Request.URL.Path, user)
 			}
 			c.Set("user", user)
@@ -42,12 +43,12 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		if user, ok := c.Get("user"); !ok {
-			if Config.Verbose > 0 {
+			if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 				log.Println(c.Request.Method, c.Request.URL.Path)
 			}
 			c.Redirect(http.StatusFound, "/login")
 		} else {
-			if Config.Verbose > 0 {
+			if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 				log.Println(c.Request.Method, c.Request.URL.Path, user)
 			}
 		}
@@ -71,7 +72,7 @@ func refreshToken() error {
 			return err
 		}
 	} else {
-		err = _token.Validate(Config.AuthzClientId)
+		err = _token.Validate(oreConfig.Config.Authz.ClientId)
 	}
 	return err
 }
@@ -79,7 +80,7 @@ func refreshToken() error {
 // helper function to obtain JWT token from OreCast Authz service
 func getToken() (authz.Token, error) {
 	var token authz.Token
-	rurl := fmt.Sprintf("%s/oauth/token?client_id=%s&client_secret=%s&grant_type=client_credentials&scope=read", Config.AuthzURL, Config.AuthzClientId, Config.AuthzClientSecret)
+	rurl := fmt.Sprintf("%s/oauth/token?client_id=%s&client_secret=%s&grant_type=client_credentials&scope=read", oreConfig.Config.Services.AuthzURL, oreConfig.Config.Authz.ClientId, oreConfig.Config.Authz.ClientSecret)
 	resp, err := http.Get(rurl)
 	defer resp.Body.Close()
 	data, err := io.ReadAll(resp.Body)
@@ -91,12 +92,12 @@ func getToken() (authz.Token, error) {
 		return token, err
 	}
 	reqToken := token.AccessToken
-	if Config.Verbose > 0 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 		log.Printf("INFO: obtain token %+v", token)
 	}
 
 	// validate our token
-	var jwtKey = []byte(Config.AuthzClientId)
+	var jwtKey = []byte(oreConfig.Config.Authz.ClientId)
 	claims := &authz.Claims{}
 	tkn, err := jwt.ParseWithClaims(reqToken, claims, func(token *jwt.Token) (any, error) {
 		return jwtKey, nil
@@ -122,12 +123,12 @@ func httpGet(rurl string) (*http.Response, error) {
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", _token.AccessToken))
 	client := &http.Client{}
-	if Config.Verbose > 1 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 1 {
 		dump, err := httputil.DumpRequestOut(req, true)
 		log.Println("request", string(dump), err)
 	}
 	resp, err := client.Do(req)
-	if Config.Verbose > 1 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 1 {
 		dump, err := httputil.DumpResponse(resp, true)
 		log.Println("response", string(dump), err)
 	}
@@ -144,12 +145,12 @@ func httpPost(rurl, contentType string, buffer *bytes.Buffer) (*http.Response, e
 	req.Header.Add("Content-Type", contentType)
 	req.Header.Add("Accept", contentType)
 	client := &http.Client{}
-	if Config.Verbose > 1 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 1 {
 		dump, err := httputil.DumpRequestOut(req, true)
 		log.Println("request", string(dump), err)
 	}
 	resp, err := client.Do(req)
-	if Config.Verbose > 1 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 1 {
 		dump, err := httputil.DumpResponse(resp, true)
 		log.Println("response", string(dump), err)
 	}
@@ -165,12 +166,12 @@ func httpPostForm(rurl string, formData url.Values) (*http.Response, error) {
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", _token.AccessToken))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	client := &http.Client{}
-	if Config.Verbose > 1 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 1 {
 		dump, err := httputil.DumpRequestOut(req, true)
 		log.Println("request", string(dump), err)
 	}
 	resp, err := client.Do(req)
-	if Config.Verbose > 1 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 1 {
 		dump, err := httputil.DumpResponse(resp, true)
 		log.Println("response", string(dump), err)
 	}
@@ -180,7 +181,7 @@ func httpPostForm(rurl string, formData url.Values) (*http.Response, error) {
 // helper function to encrypt user registration form attributes
 func encryptUserObject(form UserRegistrationForm) (UserRegistrationForm, error) {
 	encryptedObject, err := cryptoutils.HexEncrypt(
-		form.Password, Config.DiscoveryPassword, Config.DiscoveryCipher)
+		form.Password, oreConfig.Config.Encryption.Secret, oreConfig.Config.Encryption.Cipher)
 	if err != nil {
 		return form, err
 	} else {
@@ -192,7 +193,7 @@ func encryptUserObject(form UserRegistrationForm) (UserRegistrationForm, error) 
 // helper function to encrypt login form attributes
 func encryptLoginObject(form LoginForm) (LoginForm, error) {
 	encryptedObject, err := cryptoutils.HexEncrypt(
-		form.Password, Config.DiscoveryPassword, Config.DiscoveryCipher)
+		form.Password, oreConfig.Config.Encryption.Secret, oreConfig.Config.Encryption.Cipher)
 	if err != nil {
 		return form, err
 	} else {

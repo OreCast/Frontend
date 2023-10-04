@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+
+	oreConfig "github.com/OreCast/common/config"
 )
 
 // helper function to get metadata
@@ -25,9 +27,9 @@ type MetaDataRecord struct {
 // helper function to fetch sites info from discovery service
 func metadata(site string) MetaDataRecord {
 	var results MetaDataRecord
-	rurl := fmt.Sprintf("%s/meta/%s", Config.MetaDataURL, site)
+	rurl := fmt.Sprintf("%s/meta/%s", oreConfig.Config.Services.MetaDataURL, site)
 	resp, err := httpGet(rurl)
-	if Config.Verbose > 0 {
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 		log.Println("query MetaData service rurl", rurl, err)
 	}
 	if err != nil {
