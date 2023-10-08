@@ -35,8 +35,12 @@ func AuthMiddleware() gin.HandlerFunc {
 			}
 			c.Set("user", user)
 			if err := refreshToken(); err != nil {
+				c.SetCookie("user", "", -1, "/", "localhost", false, true)
+				c.Set("user", "")
 				content := errorTmpl(c, "unable to get valid token", err)
-				c.Data(http.StatusUnauthorized, "text/html; charset=utf-8", []byte(content))
+				log.Fatal(content)
+				//                 c.Data(http.StatusUnauthorized, "text/html; charset=utf-8", []byte(content))
+				//                 c.Redirect(http.StatusFound, "/")
 				return
 			}
 			return
