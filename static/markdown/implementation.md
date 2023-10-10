@@ -106,7 +106,7 @@ the following set of actions:
 ```
 curl -X POST -H "Content-type: application/json" \
     -d '{"name":"cornell", "url": "http://localhost:xxxx", "access_key":"xxx", "access_secret":"xxx"}' \
-    http://localhost:8320/sites
+    http://localhost:8320/site
 ```
 Once we inserted the record we may look-up back existing sites in discovery
 service
