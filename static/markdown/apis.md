@@ -1,8 +1,5 @@
 # OreCast API toolkit
-The high level overview of OreCast APIs can be found here:
-![OreCastApis](/images/OreCastApis.png)
-
-Below we provide description of individual APIs:
+Below we provide description of individual OreCast services APIs.
 
 ### Frontend service
 Fronend service provides HTTP end-points for the following actions:
@@ -74,12 +71,33 @@ Here is a list of implemented APIs:
 
 ### DataBookkeeping service
 - HTTP GET
+    - `/datasets` list all datasets
+    - `/dataset/*dataset` list details of individual dataset
+    - `/files` list all known files
+    - `/file/*name` get details of individual file
+
 - HTTP PUT
+    - `/dataset/*name` update given dataset
+    - `/file/*name` update given file
 - HTTP POST
+    - `/dataset` create new dataset
+    - `/file` create new file
+
 - HTTP DELETE
+    - `/dataset/*name` delete given dataset
+    - `/file/*name` delete given file
 
 ### DataManagement service
 - HTTP GET
+    - `/storage` get list of S3 storages
+    - `/storage:site` get S3 storage info for a given site
+    - `/storage:site/:bucket` get S3 bucket info for a given site and bucket
+    - `/storage:site/:bucket/:object` get S3 file info for a given site and bucket
 - HTTP PUT
 - HTTP POST
+    - `/storage:site/:bucket` create new bucket on S3 storage at given site
+    - `/storage:site/:bucket/:object` create new object
+
 - HTTP DELETE
+    - `/storage:site/:bucket` delete bucket on S3 storage at given site
+    - `/storage:site/:bucket/:object` delete object
