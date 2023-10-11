@@ -14,8 +14,10 @@ The OreCast architecture is based on loosely coupled set of MicroServices:
 - the authentication and authorization service
 - the command line client
 All of them are glued together by HTTP protocol and represent whole
-infrustructure. For further details please refer to [implementation](docs/implementation.md)
-details.
+infrustructure. For details of data flow please refer to
+[data-flow](docs/dataflow.md) documentation.
+For further details please refer to [implementation](docs/implementation.md)
+and [apis](docs/apis.md) details.
 
 So far, the OreCast framework is work in progress, please refer to our
 current list of [TODO tasks](docs/TODO.md).
