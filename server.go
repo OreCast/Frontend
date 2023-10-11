@@ -83,6 +83,7 @@ func setupRouter() *gin.Engine {
 		authorized.GET("/meta/:site/delete", MetaDeleteHandler)
 
 		authorized.GET("/sites", SitesHandler)
+		authorized.GET("/site/:site", SitesHandler)
 		authorized.GET("/site/registration", SiteRegistrationHandler)
 
 		authorized.GET("/data/registration", DataRegistrationHandler)

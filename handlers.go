@@ -355,10 +355,18 @@ func SitesHandler(c *gin.Context) {
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	tmpl["Base"] = oreConfig.Config.Frontend.WebServer.Base
 	var content string
+	var sname string
+	var params StorageParams
+	if err := c.ShouldBindUri(&params); err == nil {
+		sname = params.Site
+	}
 	for _, sobj := range getSites() {
 		site := sobj.Name
 		if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 			log.Printf("processing %+v", sobj)
+		}
+		if sname != "" && site != sname {
+			continue
 		}
 		rec := metadata(site)
 		tmpl["Site"] = site
