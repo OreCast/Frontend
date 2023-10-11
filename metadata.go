@@ -44,3 +44,24 @@ func metadata(site string) MetaDataRecord {
 	}
 	return results
 }
+
+// helper function to fetch sites info from discovery service
+func getMetaRecord(mid string) MetaDataRecord {
+	var results MetaDataRecord
+	rurl := fmt.Sprintf("%s/meta/record/%s", oreConfig.Config.Services.MetaDataURL, mid)
+	resp, err := httpGet(rurl)
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
+		log.Println("query MetaData service rurl", rurl, err)
+	}
+	if err != nil {
+		log.Println("ERROR:", err)
+		return results
+	}
+	defer resp.Body.Close()
+	dec := json.NewDecoder(resp.Body)
+	if err := dec.Decode(&results); err != nil {
+		log.Println("ERROR:", err)
+		return results
+	}
+	return results
+}

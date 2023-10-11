@@ -1,75 +1,20 @@
-<div class="grid menu min-height">
-    <div class="column column-2">
-        <nav class="menu menu-pills">
-            <ul class="menu-list">
-                <li class="menu-item">
-                    &nbsp;
-                </li>
-                <li class="menu-item">
-                    &nbsp;
-                </li>
-                <li class="menu-item">
-                    <a href="{{.Base}}/data/{{.Site}}/upload" class="menu-link">
-                        <span class="icon icon-16 ml-1">
-                          <img src="https://cdn.onlinewebfonts.com/svg/img_548685.png" alt="Upload" style="width:25px;">
-                        </span>
-                        &nbsp;
-                        <span>Upload data</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{.Base}}/data/{{.Site}}/delete" class="menu-link">
-                        <span class="icon icon-16 ml-1">
-                          <img src="https://cdn.onlinewebfonts.com/svg/img_564444.png" alt="Delete" style="width:25px;">
-                        </span>
-                        &nbsp;
-                        <span>Delete data</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </div>
-    <div class="column column-10">
-        <div id="orecast-content" class="show">
-            <h1 class="text-huge">
-                S3 BUCKET:
-                {{.StoragePath}}
-                holds {{.NObjects}} objects
-            </h1>
+<section>
+    <article>
+        <div class="grid grid-gapless">
+            <div class="column column-3">
+                <b class="text-huge">DATASET</b>
             </div>
-            <hr/>
-            <div class="grid grid-gapless">
-                <div class="column column-3">
-                    <b>ETag</b>
-                </div>
-                <div class="column column-3">
-                    <b>Timestamp</b>
-                </div>
-                <div class="column column-3">
-                    <b>Size (bytes)</b>
-                </div>
-                <div class="column column-3">
-                    <b>Name</b>
-                </div>
+            <div class="column column-3">
+                <b class="text-huge">PROCESSING</b>
             </div>
-{{range $d := .Datasets}}
-            <div class="grid grid-gapless">
-                <div class="column column-3">
-                    {{$d.ShortETag}}...
-                    <input type="hidden" value="{{$d.ETag}}">
-                </div>
-                <div class="column column-3">
-                    {{$d.LastModified}}
-                </div>
-                <div class="column column-3">
-                    {{$d.Size}} 
-                </div>
-                <div class="column column-3">
-                    <a href="{{$.DataManagementURL}}/storage/{{$.Site}}/{{$.Bucket}}/{{$d.Name}}">{{$d.Name}}</a>
-                </div>
+            <div class="column column-3">
+                <b class="text-huge">SITE</b>
             </div>
-{{end}}
-
+            <div class="column column-3">
+                <b class="text-huge">META</b>
+            </div>
         </div>
-    </div>
-</div>
+        <hr/>
+        {{.Content}}
+    </article>
+</section>

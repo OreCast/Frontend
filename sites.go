@@ -22,7 +22,7 @@ type Site struct {
 }
 
 // helper function to fetch sites info from discovery service
-func sites() []Site {
+func getSites() []Site {
 	var out []Site
 	rurl := fmt.Sprintf("%s/sites", oreConfig.Config.Services.DiscoveryURL)
 	resp, err := httpGet(rurl)

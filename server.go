@@ -73,38 +73,48 @@ func setupRouter() *gin.Engine {
 	authorized.Use(AuthMiddleware())
 	{
 		// GET methods
-		authorized.GET("/data", DataHandler)
-		authorized.GET("/data/access", DataAccessHandler)
+		authorized.GET("/datasets", DatasetHandler)
+		authorized.GET("/dataset/:dataset", DatasetHandler)
+
 		authorized.GET("/meta", MetaDataHandler)
-		authorized.GET("/sites", SitesHandler)
-		authorized.GET("/site/access", SiteAccessHandler)
-		authorized.GET("/analytics", AnalyticsHandler)
-		authorized.GET("/discovery", DiscoveryHandler)
-		authorized.GET("/provenance", ProvenanceHandler)
+		authorized.GET("/meta/record/:mid", MetaRecordHandler)
 		authorized.GET("/meta/:site", MetaSiteHandler)
+		authorized.GET("/meta/:site/upload", MetaUploadHandler)
+		authorized.GET("/meta/:site/delete", MetaDeleteHandler)
+
+		authorized.GET("/sites", SitesHandler)
+		authorized.GET("/site/registration", SiteRegistrationHandler)
+
+		authorized.GET("/data/registration", DataRegistrationHandler)
+		authorized.GET("/data/:site/upload", DataUploadHandler)
+		authorized.GET("/data/:site/delete", DataDeleteHandler)
+
 		authorized.GET("/storage/:site", SiteBucketsHandler)
 		authorized.GET("/storage/:site/:bucket", BucketObjectsHandler)
 		authorized.GET("/storage/:site/create", S3CreateHandler)
 		authorized.GET("/storage/:site/upload", S3UploadHandler)
 		authorized.GET("/storage/:site/delete", S3DeleteHandler)
-		authorized.GET("/site/registration", SiteRegistrationHandler)
-		authorized.GET("/data/registration", DataRegistrationHandler)
-		authorized.GET("/meta/:site/upload", MetaUploadHandler)
-		authorized.GET("/meta/:site/delete", MetaDeleteHandler)
-		authorized.GET("/data/:site/upload", DataUploadHandler)
-		authorized.GET("/data/:site/delete", DataDeleteHandler)
+
+		authorized.GET("/analytics", AnalyticsHandler)
+		authorized.GET("/discovery", DiscoveryHandler)
+		authorized.GET("/provenance", ProvenanceHandler)
 		authorized.GET("/project", ProjectHandler)
 		authorized.GET("/project/:page", ProjectHandler)
 
 		// POST methods
 		authorized.POST("/project/registration", ProjectRegistrationPostHandler)
+
 		authorized.POST("/site/registration", SiteRegistrationPostHandler)
+
 		authorized.POST("/data/registration", DataRegistrationPostHandler)
+
 		authorized.POST("/storage/create", S3CreatePostHandler)
 		authorized.POST("/storage/upload", S3UploadPostHandler)
 		authorized.POST("/storage/delete", S3DeletePostHandler)
+
 		authorized.POST("/meta/upload", MetaUploadPostHandler)
 		authorized.POST("/meta/delete", MetaDeletePostHandler)
+
 		authorized.POST("/data/upload", DataUploadPostHandler)
 		authorized.POST("/data/delete", DataDeletePostHandler)
 	}

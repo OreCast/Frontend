@@ -126,6 +126,7 @@ func httpGet(rurl string) (*http.Response, error) {
 		return nil, err
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", _token.AccessToken))
+	req.Header.Add("Accept-Encoding", "")
 	client := &http.Client{}
 	if oreConfig.Config.Frontend.WebServer.Verbose > 1 {
 		dump, err := httputil.DumpRequestOut(req, true)

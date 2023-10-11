@@ -119,6 +119,16 @@ type DocsParams struct {
 	Page string `uri:"page" binding:"required"`
 }
 
+// MetaIdParams represents URI storage params in /docs/:page end-point
+type MetaIdParams struct {
+	MetaId string `uri:"mid" binding:"required"`
+}
+
+// DsParams represents URI storage params in /docs/:page end-point
+type DsParams struct {
+	Dataset string `uri:"dataset" binding:"required"`
+}
+
 //
 // helper functions
 //
@@ -210,6 +220,64 @@ func MetaDataHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
+// MetaRecordHandler provides access to GET /meta/record/:mid endpoint
+func MetaRecordHandler(c *gin.Context) {
+	tmpl := makeTmpl(c, "Sites")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+	tmpl["Base"] = oreConfig.Config.Frontend.WebServer.Base
+	var params MetaIdParams
+	if err := c.ShouldBindUri(&params); err != nil {
+		msg := fmt.Sprintf("fail to bind meta/record/:mid parameters, error %v", err)
+		content := errorTmpl(c, msg, err)
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+
+	results := getMetaRecord(params.MetaId)
+	if results.Status != "ok" {
+		msg := fmt.Sprintf("fail to find mid %s", params.MetaId)
+		content := errorTmpl(c, msg, errors.New("Not Found"))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(top+content+bottom))
+		return
+	}
+	data := results.Data
+	record := data[0]
+	tmpl["ID"] = record.ID
+	tmpl["Description"] = record.Description
+	tmpl["Tags"] = record.Tags
+	tmpl["Bucket"] = record.Bucket
+	meta := tmplPage("meta_record.tmpl", tmpl)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+meta+bottom))
+}
+
+// DatasetHandler provides access to GET /dataset endpoint
+func DatasetHandler(c *gin.Context) {
+	tmpl := makeTmpl(c, "Data")
+	top := tmplPage("top.tmpl", tmpl)
+	bottom := tmplPage("bottom.tmpl", tmpl)
+	tmpl["Base"] = oreConfig.Config.Frontend.WebServer.Base
+	var content, dsName string
+	var params DsParams
+	if err := c.ShouldBindUri(&params); err == nil {
+		dsName = params.Dataset
+	}
+	for _, dobj := range getDatasets(dsName) {
+		if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
+			log.Printf("processing %+v", dobj)
+		}
+		tmpl["Dataset"] = dobj.Dataset
+		tmpl["Site"] = dobj.Site
+		tmpl["MetaId"] = dobj.MetaId
+		tmpl["Processing"] = dobj.Processing
+		datasetContent := tmplPage("dataset_record.tmpl", tmpl)
+		content += fmt.Sprintf("%s", template.HTML(datasetContent))
+	}
+	tmpl["Content"] = template.HTML(content)
+	datasets := tmplPage("datasets.tmpl", tmpl)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+datasets+bottom))
+}
+
 // DiscoveryHandler provides access to GET /discovery endpoint
 func DiscoveryHandler(c *gin.Context) {
 	tmpl := makeTmpl(c, "Discovery")
@@ -256,7 +324,7 @@ func MetaSiteHandler(c *gin.Context) {
 
 	site := params.Site
 	var records []MetaData
-	for _, sobj := range sites() {
+	for _, sobj := range getSites() {
 		if site == sobj.Name {
 			if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 				log.Printf("processing %+v", sobj)
@@ -287,7 +355,7 @@ func SitesHandler(c *gin.Context) {
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	tmpl["Base"] = oreConfig.Config.Frontend.WebServer.Base
 	var content string
-	for _, sobj := range sites() {
+	for _, sobj := range getSites() {
 		site := sobj.Name
 		if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
 			log.Printf("processing %+v", sobj)

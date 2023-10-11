@@ -1,0 +1,22 @@
+<section>
+    <article>
+        ID: {{.ID}}
+        <br/>
+        Description: {{.Description}}
+        <br/>
+        Tags: {{.Tags}}
+        <br/>
+        <div class="card-author flex">
+            <div class="card-author-box">
+                Access link: &nbsp;
+            </div>
+            <div class="card-author-avatar mr-3">
+                <figure class="image-48">
+                <a href="/storage/{{$.Site}}/{{.Bucket}}">
+                  <img src="https://cdn.onlinewebfonts.com/svg/img_554814.png" alt="Records" style="width:25px;">
+                </a>
+                </figure>
+            </div>
+        </div>
+    </article>
+</section>

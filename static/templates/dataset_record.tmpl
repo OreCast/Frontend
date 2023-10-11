@@ -1,0 +1,19 @@
+<div class="grid grid-gapless">
+    <div class="column column-3">
+        <h1 class="text-large">{{.Dataset}}</h1>
+    </div>
+    <div class="column column-3">
+        {{.Processing}}
+    </div>
+    <div class="column column-3">
+        <a href="{{.Base}}/site/{{.Site}}" class="button button-small">
+            {{.Site}}
+        </a>
+    </div>
+    <div class="column column-3">
+        <a href="{{.Base}}/meta/record/{{.MetaId}}" class="button button-small">
+          {{.MetaId}}
+        </a>
+    </div>
+</div>
+<hr/>
