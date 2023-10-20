@@ -122,6 +122,7 @@ type DocsParams struct {
 // MetaIdParams represents URI storage params in /docs/:page end-point
 type MetaIdParams struct {
 	MetaId string `uri:"mid" binding:"required"`
+	Site string `uri:"site" binding:"required"`
 }
 
 // DsParams represents URI storage params in /docs/:page end-point
@@ -222,7 +223,7 @@ func MetaDataHandler(c *gin.Context) {
 
 // MetaRecordHandler provides access to GET /meta/record/:mid endpoint
 func MetaRecordHandler(c *gin.Context) {
-	tmpl := makeTmpl(c, "Sites")
+	tmpl := makeTmpl(c, "Meta-record")
 	top := tmplPage("top.tmpl", tmpl)
 	bottom := tmplPage("bottom.tmpl", tmpl)
 	tmpl["Base"] = oreConfig.Config.Frontend.WebServer.Base
@@ -247,6 +248,7 @@ func MetaRecordHandler(c *gin.Context) {
 	tmpl["Description"] = record.Description
 	tmpl["Tags"] = record.Tags
 	tmpl["Bucket"] = record.Bucket
+	tmpl["Site"] = params.Site
 	meta := tmplPage("meta_record.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+meta+bottom))
 }
@@ -264,7 +266,7 @@ func DatasetHandler(c *gin.Context) {
 	}
 	for _, dobj := range getDatasets(dsName) {
 		if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
-			log.Printf("processing %+v", dobj)
+			log.Printf("processing datset object %+v", dobj)
 		}
 		tmpl["Dataset"] = dobj.Dataset
 		tmpl["Site"] = dobj.Site
@@ -504,13 +506,14 @@ func BucketObjectsHandler(c *gin.Context) {
 			Size:         size}
 		datasets = append(datasets, d)
 	}
+
 	tmpl["StoragePath"] = fmt.Sprintf("/storage/%s/%s", site, bucket)
 	tmpl["Datasets"] = datasets
 	tmpl["DataManagementURL"] = oreConfig.Config.Services.DataManagementURL
 	tmpl["NObjects"] = len(datasets)
 	tmpl["Site"] = site
 	tmpl["Bucket"] = bucket
-	content := tmplPage("datasets.tmpl", tmpl)
+	content := tmplPage("dataobjects.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
 }
 
