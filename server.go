@@ -77,7 +77,7 @@ func setupRouter() *gin.Engine {
 		authorized.GET("/dataset/:dataset", DatasetHandler)
 
 		authorized.GET("/meta", MetaDataHandler)
-		authorized.GET("/meta/record/:mid", MetaRecordHandler)
+		authorized.GET("/meta/record/:mid/:site", MetaRecordHandler)
 		authorized.GET("/meta/:site", MetaSiteHandler)
 		authorized.GET("/meta/:site/upload", MetaUploadHandler)
 		authorized.GET("/meta/:site/delete", MetaDeleteHandler)
