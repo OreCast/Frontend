@@ -38,10 +38,10 @@ cloud.google.com/go/storage v1.14.0/go.mod h1:GrKmX003DSIwi9o29oFT7YDnHYwZoctc3f
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/OreCast/common/authz v0.0.0-20231008113920-e5b3f8d8b2d9 h1:gOxItfizLi3Scwlw7VNGY1hjCoT4Kcu47bxRDWiBBEo=
-github.com/OreCast/common/authz v0.0.0-20231008113920-e5b3f8d8b2d9/go.mod h1:jDwwPWwkZ7e/Uzv2Xz7+3AO4uHtnrCNUq4/5hpwPTDM=
-github.com/OreCast/common/config v0.0.0-20231008113920-e5b3f8d8b2d9 h1:sp7jWHtuDmip+TcctqN1sfSZVByrJd4iH3f/i7/pyOo=
-github.com/OreCast/common/config v0.0.0-20231008113920-e5b3f8d8b2d9/go.mod h1:DBXpsKa8GFsH7rgiRi3JZPsOhwFK6m8AOev2wySo0dc=
+github.com/OreCast/common/authz v0.0.0-20231023133551-89831eb1dae5 h1:Z2/pRk3lOBP7IpzlRSJRK5kETRzf1wIqMC0WksUO1vs=
+github.com/OreCast/common/authz v0.0.0-20231023133551-89831eb1dae5/go.mod h1:jDwwPWwkZ7e/Uzv2Xz7+3AO4uHtnrCNUq4/5hpwPTDM=
+github.com/OreCast/common/config v0.0.0-20231023133551-89831eb1dae5 h1:sbO/qjIvgPcCV0LuIVXW+xSY9nLj6XiCmaG8zOElPeA=
+github.com/OreCast/common/config v0.0.0-20231023133551-89831eb1dae5/go.mod h1:DBXpsKa8GFsH7rgiRi3JZPsOhwFK6m8AOev2wySo0dc=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
 github.com/bytedance/sonic v1.9.1 h1:6iJ6NqdoxCDr6mbY8h18oSO+cShGSMRGCEo7F2h0x8s=
 github.com/bytedance/sonic v1.9.1/go.mod h1:i736AoUSYt75HyZLoJW9ERYxcy6eaN6h4BZXU064P/U=

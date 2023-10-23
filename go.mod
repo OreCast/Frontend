@@ -1,10 +1,10 @@
 module github.com/OreCast/Frontend
 
-go 1.21.2
+go 1.21.3
 
 require (
-	github.com/OreCast/common/authz v0.0.0-20231008113920-e5b3f8d8b2d9
-	github.com/OreCast/common/config v0.0.0-20231008113920-e5b3f8d8b2d9
+	github.com/OreCast/common/authz v0.0.0-20231023133551-89831eb1dae5
+	github.com/OreCast/common/config v0.0.0-20231023133551-89831eb1dae5
 	github.com/dchest/captcha v1.0.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang-jwt/jwt/v4 v4.5.0
