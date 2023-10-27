@@ -169,7 +169,13 @@ func IndexHandler(c *gin.Context) {
 	user, err := c.Cookie("user")
 	if err == nil {
 		c.Set("user", user)
+	} else {
+		log.Println("WARNING: unable to get user cookie", err)
 	}
+	if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
+		log.Printf("user from c.Cookie: '%s'", user)
+	}
+
 	// top and bottom HTTP content from our templates
 	tmpl := makeTmpl(c, "OreCast home")
 	top := tmplPage("top.tmpl", tmpl)
@@ -179,6 +185,7 @@ func IndexHandler(c *gin.Context) {
 	if user != "" {
 		tmpl["LogoClass"] = "hide"
 		tmpl["MapClass"] = "show"
+		tmpl["Users"] = user
 	}
 	content := tmplPage("index.tmpl", tmpl)
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(top+content+bottom))
