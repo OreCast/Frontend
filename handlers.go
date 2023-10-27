@@ -635,7 +635,7 @@ func LoginHandler(c *gin.Context) {
 
 // LogoutHandler provides access to GET /logout endpoint
 func LogoutHandler(c *gin.Context) {
-	c.SetCookie("user", "", -1, "/", hostname(), false, true)
+	c.SetCookie("user", "", -1, "/", domain(), false, true)
 	c.Redirect(http.StatusFound, "/")
 }
 
@@ -751,9 +751,9 @@ func LoginPostHandler(c *gin.Context) {
 	// set our user cookie
 	if _, err := c.Cookie("user"); err != nil {
 		if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
-			log.Printf("set cookie user=%s hostname=%s", form.User, hostname())
+			log.Printf("set cookie user=%s domain=%s", form.User, domain())
 		}
-		c.SetCookie("user", form.User, 3600, "/", hostname(), false, true)
+		c.SetCookie("user", form.User, 3600, "/", domain(), false, true)
 	}
 
 	// redirect
@@ -982,9 +982,9 @@ func UserRegistryPostHandler(c *gin.Context) {
 	// set our user cookie
 	if _, err := c.Cookie("user"); err != nil {
 		if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
-			log.Printf("user registry: set cookie user=%s hostname=%s", form.Login, hostname())
+			log.Printf("user registry: set cookie user=%s domain=%s", form.Login, domain())
 		}
-		c.SetCookie("user", form.Login, 3600, "/", hostname(), false, true)
+		c.SetCookie("user", form.Login, 3600, "/", domain(), false, true)
 		c.Set("user", form.Login)
 	}
 
