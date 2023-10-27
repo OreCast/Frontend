@@ -122,7 +122,7 @@ type DocsParams struct {
 // MetaIdParams represents URI storage params in /docs/:page end-point
 type MetaIdParams struct {
 	MetaId string `uri:"mid" binding:"required"`
-	Site string `uri:"site" binding:"required"`
+	Site   string `uri:"site" binding:"required"`
 }
 
 // DsParams represents URI storage params in /docs/:page end-point
@@ -628,7 +628,7 @@ func LoginHandler(c *gin.Context) {
 
 // LogoutHandler provides access to GET /logout endpoint
 func LogoutHandler(c *gin.Context) {
-	c.SetCookie("user", "", -1, "/", "localhost", false, true)
+	c.SetCookie("user", "", -1, "/", hostname(), false, true)
 	c.Redirect(http.StatusFound, "/")
 }
 
@@ -743,7 +743,7 @@ func LoginPostHandler(c *gin.Context) {
 
 	// set our user cookie
 	if _, err := c.Cookie("user"); err != nil {
-		c.SetCookie("user", form.User, 3600, "/", "localhost", false, true)
+		c.SetCookie("user", form.User, 3600, "/", hostname(), false, true)
 	}
 
 	// redirect
@@ -971,7 +971,7 @@ func UserRegistryPostHandler(c *gin.Context) {
 
 	// set our user cookie
 	if _, err := c.Cookie("user"); err != nil {
-		c.SetCookie("user", form.Login, 3600, "/", "localhost", false, true)
+		c.SetCookie("user", form.Login, 3600, "/", hostname(), false, true)
 		c.Set("user", form.Login)
 	}
 

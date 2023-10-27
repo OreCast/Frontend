@@ -3,6 +3,7 @@ package main
 import (
 	"io"
 	"log"
+	"os"
 
 	"github.com/gomarkdown/markdown"
 	mhtml "github.com/gomarkdown/markdown/html"
@@ -52,4 +53,17 @@ func mdToHTML(fname string) (string, error) {
 	content := markdown.Render(doc, renderer)
 	//     return html.EscapeString(string(content)), nil
 	return string(content), nil
+}
+
+// helper function to get hostname
+func hostname() string {
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Println("ERROR: unable to get hostname, error:", err)
+		hostname = "localhost"
+	}
+	if hostname == "vkarm" {
+		hostname = "localhost"
+	}
+	return hostname
 }
