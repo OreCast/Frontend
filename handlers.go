@@ -743,6 +743,9 @@ func LoginPostHandler(c *gin.Context) {
 
 	// set our user cookie
 	if _, err := c.Cookie("user"); err != nil {
+		if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
+			log.Printf("set cookie user=%s hostname=%s", form.User, hostname())
+		}
 		c.SetCookie("user", form.User, 3600, "/", hostname(), false, true)
 	}
 
@@ -971,6 +974,9 @@ func UserRegistryPostHandler(c *gin.Context) {
 
 	// set our user cookie
 	if _, err := c.Cookie("user"); err != nil {
+		if oreConfig.Config.Frontend.WebServer.Verbose > 0 {
+			log.Printf("user registry: set cookie user=%s hostname=%s", form.Login, hostname())
+		}
 		c.SetCookie("user", form.Login, 3600, "/", hostname(), false, true)
 		c.Set("user", form.Login)
 	}
